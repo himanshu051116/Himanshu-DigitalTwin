@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+node_modules/
+.DS_Store
+*.log
+backend/artifacts/*.joblib
+backend/artifacts/*.pkl
+backend/data/raw/
+backend/data/downloads/
