@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>HimanshuDigitalTwin</title>
+<link rel="stylesheet" href="/prototype/styles.css"/>
+</head>
+<body>
+<main>
+  <header class="topbar">
+    <div class="brand"><div class="mark">HD</div><div><h1>HimanshuDigitalTwin</h1><p>Adaptive metabolic digital twin · research prototype</p></div></div>
+    <div class="header-status"><span id="syncBadge" class="badge good">● SYNCHRONIZED</span><span id="versionBadge" class="badge">v1</span></div>
+  </header>
+  <div id="dataBanner" class="disclaimer">Research demonstration only · No diagnosis, dosing, or treatment recommendation · Current patient is simulated research replay.</div>
+  <nav><button class="tab active" data-tab="twin">Twin workspace</button><button class="tab" data-tab="scenario">Scenario lab</button><button class="tab" data-tab="evidence">Evidence & safety</button></nav>
+
+  <section class="controls card">
+    <div><label>Patient</label><select id="patientSelect"></select></div>
+    <div id="quickProfile" class="quick-profile"></div><div class="real-load"><select id="realSubject"><option>No local real cohort downloaded</option></select><button id="loadRealBtn" disabled>Load real replay</button><small id="realStatus">Checking real cohorts…</small></div>
+    <div class="playback"><button id="runBtn" class="primary">Run replay</button><button id="stepBtn">Step</button><button id="resetBtn">Reset</button><select id="speedSelect"><option value="1">1×</option><option value="3">3×</option><option value="6">6×</option><option value="12">12×</option></select></div>
+  </section>
+
+  <section class="judge-guide card" aria-label="Guided judge demonstration">
+    <div class="judge-guide-copy"><strong>Guided judge demo</strong><small>One-click synthetic story · reproducible · no clinical claims</small></div>
+    <label for="judgeChapter" class="visually-hidden">Demonstration chapter</label>
+    <select id="judgeChapter"><option value="baseline">1 · Baseline</option><option value="breakfast">2 · Breakfast</option><option value="lunch">3 · Lunch</option><option value="verification">4 · Verification</option><option value="sensor_gap">5 · Sensor gap</option><option value="recovery">6 · Recovery</option></select>
+    <button id="judgeDemoBtn" type="button">Show chapter</button>
+    <small class="judge-info">Shows honest prediction, verification, sensor safety and recovery.</small>
+  </section>
+
+  <div id="viewTwin" class="view">
+    <section class="metric-grid">
+      <article class="card metric"><span class="eyebrow">Current glucose</span><div id="glucose" class="big">—</div><div class="subrow"><span id="qualityBadge" class="badge">—</span><span id="timeNow">—</span></div></article>
+      <article class="card metric"><span class="eyebrow">2-hour excursion risk</span><div id="riskModelFlag" class="risk-mode-flag">SIMULATED · UNCALIBRATED RISK</div><div id="risk" class="big">—</div><div class="subrow"><span id="riskBadge" class="badge">—</span><span id="confidence">—</span></div></article>
+      <article class="card metric"><span class="eyebrow">Wearable state</span><div id="heartRate" class="big">—</div><div id="wearableSub" class="subrow"></div></article>
+      <article class="card metric"><span class="eyebrow">Personalization</span><div id="improvement" class="big">Learning</div><div class="subrow"><span>Replay MAE vs population · not clinically validated</span><span id="resolvedCount">0 resolved</span></div></article>
+    </section>
+
+    <section class="main-grid">
+      <article class="card panel"><div class="section-head"><div><h2>Observed → forecast trajectory</h2><p>Research forecast; illustrative demo intervals are not calibrated</p></div><span id="chartConfidence" class="badge">—</span></div><svg id="trajectory" viewBox="0 0 820 255" aria-label="Glucose trajectory"></svg><div id="forecastRows" class="forecast-rows"></div></article>
+      <article class="card panel"><div class="section-head"><div><h2>Why the twin changed</h2><p>Directional contributors from current state</p></div></div><div id="drivers" class="drivers"></div><hr/><div id="currentFacts" class="facts"></div></article>
+    </section>
+
+    <section class="lower-grid">
+      <article class="card panel"><div class="section-head"><div><h2>Replay learning (demonstration)</h2><p>Forecasts are verified against later observations</p></div></div><div id="learning" class="compare"></div><div id="biases" class="biases"></div></article>
+      <article class="card panel"><div class="section-head"><div><h2>Twin event timeline</h2><p>Auditable state evolution</p></div></div><div id="timeline" class="timeline"></div></article>
+    </section>
+  </div>
+
+  <div id="viewScenario" class="view hidden">
+    <section class="scenario-grid">
+      <article class="card panel"><h2>Scenario laboratory</h2><p class="muted">Modify model inputs while preserving the live twin. This is exploratory modelling, not a causal estimate.</p><label>Active carbohydrate input <b id="carbLabel">70 g</b></label><input id="carbSlider" type="range" min="0" max="140" value="70"/><label>Activity intensity <b id="activityLabel">20%</b></label><input id="activitySlider" type="range" min="0" max="1" step="0.05" value="0.2"/><button id="scenarioBtn" class="primary wide">Run exploratory scenario</button></article>
+      <article class="card panel"><h2>Estimated trajectory shift</h2><div id="scenarioResult" class="empty">Choose inputs and run a scenario. The current twin state is not mutated.</div></article>
+    </section>
+  </div>
+
+  <div id="viewEvidence" class="view hidden">
+    <section class="evidence-grid">
+      <article class="card panel"><h2>What makes this a digital twin</h2><ul><li>Patient-specific state representation</li><li>Continuous timestamped synchronization</li><li>30/60/120-minute future prediction</li><li>Prediction → observation verification</li><li>Context-aware personal residual adaptation</li><li>Uncertainty + sensor quality awareness</li><li>Versioned, auditable timeline</li></ul></article>
+      <article class="card panel"><h2>Scientific guardrails</h2><ul class="warn-list"><li>No random row-level train/test split for CGM data</li><li>Use grouped or leave-one-subject-out validation on real cohorts</li><li>No claim of Indian clinical validation without Indian cohort evidence</li><li>No diagnosis or medication/dosing recommendation</li><li>Scenario Lab does not claim causal effects</li></ul></article>
+      <article class="card panel"><h2>Independent CGMacros real-data evaluation</h2><div id="realResearch" aria-live="polite">Loading independent research evidence…</div></article><article class="card panel"><h2>Data provenance</h2><div id="provenance" class="facts"></div></article><article class="card panel"><h2>Model evidence state</h2><div id="modelEvidence" class="facts"></div></article>
+    </section>
+  </div>
+  <footer><span>HimanshuDigitalTwin · Type-2 diabetes metabolic twin PoC</span><span>Research prototype · v0.20.0</span></footer>
+</main>
+<script src="/prototype/app.js"></script>
+</body>
+</html>

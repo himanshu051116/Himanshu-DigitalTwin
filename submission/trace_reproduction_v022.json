@@ -1,0 +1,87 @@
+{
+  "kind": "synthetic_demo_consistency_check",
+  "passed": 18,
+  "total": 18,
+  "verdict": "PASS",
+  "checks": [
+    {
+      "check": "trace_is_explicitly_synthetic",
+      "passed": true
+    },
+    {
+      "check": "six_simulated_chapters_declared",
+      "passed": true
+    },
+    {
+      "check": "baseline_responds",
+      "passed": true
+    },
+    {
+      "check": "baseline_trace_matches",
+      "passed": true
+    },
+    {
+      "check": "breakfast_responds",
+      "passed": true
+    },
+    {
+      "check": "breakfast_trace_matches",
+      "passed": true
+    },
+    {
+      "check": "lunch_responds",
+      "passed": true
+    },
+    {
+      "check": "lunch_trace_matches",
+      "passed": true
+    },
+    {
+      "check": "verification_responds",
+      "passed": true
+    },
+    {
+      "check": "verification_trace_matches",
+      "passed": true
+    },
+    {
+      "check": "sensor_gap_responds",
+      "passed": true
+    },
+    {
+      "check": "sensor_gap_trace_matches",
+      "passed": true
+    },
+    {
+      "check": "recovery_responds",
+      "passed": true
+    },
+    {
+      "check": "recovery_trace_matches",
+      "passed": true
+    },
+    {
+      "check": "gap_abstains_without_glucose_or_risk",
+      "passed": true
+    },
+    {
+      "check": "recovery_restores_synthetic_forecasts",
+      "passed": true
+    },
+    {
+      "check": "trained_runtime_not_promoted",
+      "passed": true
+    },
+    {
+      "check": "independent_evidence_is_informational_only",
+      "passed": true
+    }
+  ],
+  "not_verified": [
+    "clinical efficacy",
+    "original independent training-script reproduction",
+    "registration",
+    "public GitHub visibility",
+    "external video accessibility"
+  ]
+}

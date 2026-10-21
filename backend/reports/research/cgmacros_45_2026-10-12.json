@@ -1,0 +1,173 @@
+{
+  "title": "HimanshuDigitalTwin \u2014 REAL 45-subject CGMacros independent evidence study",
+  "run_date": "2026-10-12",
+  "data_source": "https://physionet.org/content/cgmacros/1.0.0/",
+  "acquisition": "Public PhysioNet S3 mirror with HTTP 206 range reads; 45 CGMacros participant CSVs and bio.csv",
+  "participant_files": 45,
+  "phenotype_files": 1,
+  "extracted_csv_bytes": 46741716,
+  "zip_member_integrity": "ZIP extraction CRC checks; full-archive SHA-256 not verified",
+  "cohort": {
+    "no_diabetes": 15,
+    "prediabetes": 16,
+    "type2_diabetes": 14
+  },
+  "split_method": "Stratified by published CGMacros diabetes labels, independent train/test by subject, fixed seeds 20261012..20261016",
+  "primary_split": {
+    "train_subjects": 35,
+    "test_subjects": 10,
+    "test_no_diabetes": 3,
+    "test_prediabetes": 4,
+    "test_type2_diabetes": 3,
+    "holdout_subject_numbers": [
+      3,
+      18,
+      21,
+      23,
+      29,
+      30,
+      33,
+      38,
+      41,
+      45
+    ]
+  },
+  "repeated_split_count": 5,
+  "horizons": {
+    "30": {
+      "n": 28109,
+      "mae": 13.090299318060149,
+      "rmse": 20.02503503545466,
+      "persistence": 14.816877156782525,
+      "trend": 20.083097940161515,
+      "improvement": 11.65277825045626,
+      "wins": 9,
+      "interval_q": 18.197867731654014,
+      "coverage": 0.7710341883382547,
+      "adaptive_wins": 2,
+      "adaptive_gain": -0.5533534597146388,
+      "per_subject_gain": 1.72,
+      "per_subject_CI": [
+        0.963,
+        2.342
+      ],
+      "repeats": [
+        11.65,
+        13.31,
+        12.35,
+        8.97,
+        6.6
+      ]
+    },
+    "60": {
+      "n": 28031,
+      "mae": 20.77289752582767,
+      "rmse": 31.23697293277807,
+      "persistence": 22.94476115729014,
+      "trend": 38.930476971923945,
+      "improvement": 9.465618825029324,
+      "wins": 8,
+      "interval_q": 25.449732976545647,
+      "coverage": 0.7368270842995255,
+      "adaptive_wins": 3,
+      "adaptive_gain": -0.4952316542010095,
+      "per_subject_gain": 2.161,
+      "per_subject_CI": [
+        0.272,
+        3.828
+      ],
+      "repeats": [
+        9.47,
+        11.68,
+        11.81,
+        9.27,
+        9.11
+      ]
+    },
+    "120": {
+      "n": 27875,
+      "mae": 27.668493156834476,
+      "rmse": 39.99236187803395,
+      "persistence": 32.459852914798205,
+      "trend": 67.2127067264574,
+      "improvement": 14.76087944865389,
+      "wins": 7,
+      "interval_q": 32.36703687058849,
+      "coverage": 0.7091659192825112,
+      "adaptive_wins": 5,
+      "adaptive_gain": 1.6514455983913288,
+      "per_subject_gain": 4.796,
+      "per_subject_CI": [
+        0.995,
+        8.537
+      ],
+      "repeats": [
+        14.76,
+        14.84,
+        9.68,
+        11.68,
+        13.06
+      ]
+    }
+  },
+  "event_onset_120": {
+    "train_n": 82785,
+    "test_n": 23131,
+    "train_prevalence": 0.12941958084193997,
+    "test_prevalence": 0.23388526220223943,
+    "auroc": 0.7270577604544292,
+    "current_glucose_auroc": 0.665410875136812,
+    "auprc": 0.47488790733828706,
+    "brier": 0.16540322860510895,
+    "constant_prevalence_brier": 0.19009602490890073,
+    "repeat_aurocs": [
+      0.727,
+      0.819,
+      0.735,
+      0.826,
+      0.763
+    ]
+  },
+  "versions": {
+    "python": "3.14.4",
+    "scikit_learn": "1.9.1",
+    "pandas": "3.0.6",
+    "numpy": "2.5.4"
+  },
+  "source_code_sha256": {
+    "evaluation": "7f9919f175540906a7e33daee2cb01a4b2a2265d4a0b589110c0e56bcd6fa5c3",
+    "validation": "ca7540f4c87c1409357684e4409fbbb3f06da5711b91d7bbc70dc386155ed77e"
+  },
+  "limitations": [
+    "Independent benchmark script, not exact HimanshuDigitalTwin v0.13.0 canonical train_submission.py run",
+    "One-minute harmonized subject CSVs resampled causally to five-minute right-labelled bins; original native Dexcom events not separately reconstructed",
+    "Cannot claim full archive SHA256 from selective byte-range extraction",
+    "No Shanghai independent external validation",
+    "No final promoted live application model",
+    "No clinical validation or verified India-specific clinical generalizability",
+    "Online personalization is a research EMA proxy; not identical to the production engine",
+    "Food photos intentionally excluded",
+    "Uncertainty fails 80%-coverage nominal target",
+    "Patient count is 45 with only 14 T2D subjects; holdout results sensitive to subject composition"
+  ],
+  "recommendation": {
+    "population_forecasting": "promising research result; further external validation required",
+    "automatic_personalization": "DO NOT PROMOTE",
+    "prediction_intervals": "DO NOT PROMOTE nominal 80%-coverage claim",
+    "clinical_alerts": "research-only; calibration/lead-time work pending",
+    "overall_promotion": "FAIL / NOT EXECUTED via canonical production gate"
+  },
+  "cloud_evidence": {
+    "provider": "Vercel Sandbox",
+    "project": "v0-project",
+    "snapshot_id": "snap_TNPIjoHxCA7YPFC972z61HAaNq3N",
+    "snapshot_expiration": "approximately 2026-10-19",
+    "reproducibility_zip": "/vercel/hdt_evidence/CGMacros_45_REAL_REPRODUCIBILITY_BUNDLE.zip",
+    "reproducibility_zip_sha256": "71bd0dee8a8d59e33f30da153d63220822131b955cb288fa09f537af05b8e602",
+    "model_weights_in_downloadable_local_zip": false
+  },
+  "ingested_into_app_at_version": "0.14.0",
+  "promotion_status": "NOT_ELIGIBLE_INDEPENDENT_BENCHMARK",
+  "not_the_canonical_training_pipeline": true,
+  "trained_artifacts_available_in_this_package": false
+}

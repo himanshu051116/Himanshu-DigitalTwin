@@ -1,0 +1,49 @@
+{
+  "subjects": 100,
+  "age": {
+    "min": 22.0,
+    "median": 62.5,
+    "max": 97.0
+  },
+  "gender_counts": {
+    "male": 56,
+    "female": 44
+  },
+  "hba1c": {
+    "available": 92,
+    "missing": 8,
+    "mean": 9.094565217391304,
+    "median": 8.5
+  },
+  "mean_glucose_mg_dl": {
+    "min": 68.8,
+    "median": 139.5,
+    "mean": 141.0104,
+    "max": 219.97
+  },
+  "total_cgm_records_reported": 112462,
+  "days_with_cgm": {
+    "median": 14.0,
+    "max": 41
+  },
+  "data_quality_flags": {
+    "missing_hba1c_subjects": [
+      "SH-2064",
+      "SH-2066",
+      "SH-2067",
+      "SH-2080",
+      "SH-2081",
+      "SH-2088",
+      "SH-2091",
+      "SH-2095"
+    ],
+    "mean_glucose_below_70_subjects": [
+      "SH-2077"
+    ],
+    "mean_glucose_above_200_subjects": [
+      "SH-2036",
+      "SH-2090",
+      "SH-2095"
+    ]
+  }
+}
