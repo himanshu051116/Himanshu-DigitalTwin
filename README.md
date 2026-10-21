@@ -23,8 +23,8 @@ Open **http://127.0.0.1:8000**. In the dashboard, choose the **Guided judge demo
 
 | Deliverable | Location |
 |---|---|
-| Six-slide hackathon presentation | [PDF](submission/HimanshuDigitalTwin_Presentation.pdf) · [PPTX](submission/HimanshuDigitalTwin_Presentation.pptx) |
-| System architecture | [PDF](submission/architecture.pdf) · [PPTX](submission/architecture.pptx) |
+| Six-slide hackathon presentation | [Text overview](submission/PRESENTATION_OVERVIEW.md) · slide PDF/PPTX awaiting binary upload |
+| System architecture | [PDF](submission/architecture.pdf) · editable PPTX awaiting binary upload |
 | Demo and recording outline | [Walkthrough](submission/DEMO_RUNBOOK.md) · [Video plan](submission/VIDEO_RECORDING_PLAN.md) |
 | Claim-to-evidence guide | [Evidence index](submission/JUDGE_EVIDENCE_INDEX.md) |
 | Independent CGMacros evidence | `backend/reports/research/` and `GET /api/research/evidence` |
@@ -53,7 +53,7 @@ FastAPI and Python for the API and model/evidence pipeline; HTML, CSS and JavaSc
 
 ## Status
 
-Code, presentation and architecture are provided in this repository once published. A recorded demonstration video and confirmed Unstop submission receipt must be supplied separately; neither is claimed by this README.
+The source code and accompanying text documentation are committed. The architecture PDF is available. The slide PDF/PPTX, architecture PPTX and slide preview are pending binary upload; [the text-only pitch overview](submission/PRESENTATION_OVERVIEW.md) is available meanwhile. A recorded demonstration video and confirmed Unstop submission receipt must be supplied separately; neither is claimed by this README.
 
 ## License
 
