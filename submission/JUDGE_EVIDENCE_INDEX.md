@@ -1,6 +1,6 @@
-# Algonauts — judge verification index
+# HimanshuDigitalTwin — judge verification index
 
-**Project:** HimanshuDigitalTwin · **Software engine:** v0.20.0 · **Submission visuals/proof:** v0.22.0
+**Project:** HimanshuDigitalTwin · **Team:** himanshusubh1510 · **Presenter:** Himanshu Shukla
 
 This index distinguishes features a judge can **execute**, research findings reported from a **separate study**, and important **unverified** claims. Nothing here certifies a clinical device.
 
@@ -42,7 +42,7 @@ The independent CGMacros experiment involved **45 participants**: 15 with no dia
 ## What still requires the team leader's direct action
 
 - Confirm the team roster and registration on Unstop.
-- Publish the **contents** of the `Algonauts_MITS_Gwalior` folder at the public repository root; confirm access in a signed-out browser.
+- Keep the public repository accessible to judges and verify the README, runnable source, presentation and architecture files using a signed-out browser.
 - Upload the minimum-duration demo video **as specified in the participant dashboard**; open the video link in a signed-out browser.
 - Enter the public GitHub URL, leader details and submission form fields in Unstop; capture the actual platform acknowledgement.
 
