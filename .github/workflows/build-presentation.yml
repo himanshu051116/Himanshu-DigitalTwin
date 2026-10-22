@@ -1,17 +1,17 @@
-name: Build judge presentation exports
+name: Build editable judge presentation
 
 on:
   workflow_dispatch:
   push:
     paths:
-      - "submission/Presentation.html"
+      - "submission/generate_native_deck.py"
       - ".github/workflows/build-presentation.yml"
 
 permissions:
   contents: write
 
 jobs:
-  render:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,61 +20,53 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install presentation exporters
-        run: python -m pip install --disable-pip-version-check weasyprint pypdf pymupdf python-pptx pillow
-      - name: Render and verify six-slide exports
+      - name: Install editable presentation builder
+        run: |
+          python -m pip install python-pptx pymupdf pillow
+          sudo apt-get update -qq
+          sudo apt-get install -y libreoffice-impress
+      - name: Generate editable PowerPoint
+        run: python submission/generate_native_deck.py
+      - name: Convert PowerPoint to PDF
+        run: |
+          libreoffice -env:UserInstallation=file:///tmp/hdt-slide-export --headless --convert-to pdf --outdir submission submission/HimanshuDigitalTwin_Presentation.pptx
+      - name: Verify and render preview
         run: |
           python - <<'PY'
-          from io import BytesIO
-          from pathlib import Path
           import fitz
-          from PIL import Image, ImageOps, ImageDraw
+          from pathlib import Path
+          from PIL import Image, ImageOps
           from pptx import Presentation
-          from pptx.util import Inches
-          from pypdf import PdfReader
-          from weasyprint import HTML
-
-          folder = Path("submission")
-          source = folder / "Presentation.html"
-          pdf = folder / "HimanshuDigitalTwin_Presentation.pdf"
-          pptx = folder / "HimanshuDigitalTwin_Presentation.pptx"
-          preview = folder / "Preview_All_Six_Slides.png"
-
-          HTML(filename=str(source), base_url=str(folder.resolve())).write_pdf(str(pdf))
-          assert len(PdfReader(str(pdf)).pages) == 6, "PDF does not contain six slides"
-
-          deck = Presentation()
-          deck.slide_width, deck.slide_height = Inches(16), Inches(9)
-          deck.core_properties.title = "HimanshuDigitalTwin — Six-slide submission"
-          deck.core_properties.author = "Himanshu Shukla"
-          blank = deck.slide_layouts[6]
-          tiles = []
-
-          with fitz.open(str(pdf)) as document:
-              assert document.page_count == 6, "Incorrect page count"
-              for page in document:
-                  pixels = page.get_pixmap(matrix=fitz.Matrix(1.6, 1.6), alpha=False)
-                  payload = pixels.tobytes("png")
-                  slide = deck.slides.add_slide(blank)
-                  slide.shapes.add_picture(BytesIO(payload), 0, 0, deck.slide_width, deck.slide_height)
-                  pic = Image.open(BytesIO(payload)).convert("RGB")
-                  pic.thumbnail((720, 405), Image.Resampling.LANCZOS)
-                  tiles.append(ImageOps.pad(pic, (720, 405), method=Image.Resampling.LANCZOS))
-
-          deck.save(str(pptx))
-          assert len(Presentation(str(pptx)).slides) == 6, "PPTX does not contain six slides"
-          montage = Image.new("RGB", (2160, 810), "#e4e8eb")
-          for n, tile in enumerate(tiles):
-              montage.paste(tile, ((n % 3) * 720, (n // 3) * 405))
-          montage.save(preview, optimize=True)
-          print(f"Verified 6-slide exports: {pdf}, {pptx}, {preview}")
+          folder=Path("submission")
+          ppt=folder/"HimanshuDigitalTwin_Presentation.pptx"
+          pdf=folder/"HimanshuDigitalTwin_Presentation.pdf"
+          preview=folder/"Preview_All_Six_Slides.png"
+          deck=Presentation(str(ppt))
+          assert len(deck.slides)==6, "Expected six slides"
+          assert all(len(slide.shapes)>=12 for slide in deck.slides)
+          # Editable: the content is native text and vector shapes, not image-only pages.
+          assert all(any(s.has_text_frame and s.text.strip() for s in slide.shapes) for slide in deck.slides)
+          assert all(not all(s.shape_type==13 for s in slide.shapes) for slide in deck.slides)
+          tiles=[]
+          with fitz.open(str(pdf)) as d:
+              assert d.page_count==6, "Expected six PDF pages"
+              for page in d:
+                  pix=page.get_pixmap(matrix=fitz.Matrix(1.2,1.2), alpha=False)
+                  import io
+                  img=Image.open(io.BytesIO(pix.tobytes("png"))).convert("RGB")
+                  tiles.append(ImageOps.pad(img,(720,405),method=Image.Resampling.LANCZOS))
+          sheet=Image.new("RGB",(2160,810),"#f0f4f4")
+          for i,tile in enumerate(tiles):
+              sheet.paste(tile, ((i%3)*720,(i//3)*405))
+          sheet.save(preview,optimize=True)
+          print("Editable six-slide PPTX, six-page PDF and preview passed.")
           PY
-      - name: Commit generated presentation files
+      - name: Publish regenerated files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add submission/HimanshuDigitalTwin_Presentation.pdf submission/HimanshuDigitalTwin_Presentation.pptx submission/Preview_All_Six_Slides.png
+          git add submission/HimanshuDigitalTwin_Presentation.pptx submission/HimanshuDigitalTwin_Presentation.pdf submission/Preview_All_Six_Slides.png
           if ! git diff --cached --quiet; then
-            git commit -m "Publish six-slide PDF, PowerPoint and preview"
+            git commit -m "Publish editable six-slide presentation and PDF"
             git push origin HEAD:main
           fi
