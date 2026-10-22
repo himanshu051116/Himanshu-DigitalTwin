@@ -19,7 +19,7 @@ Run `run_local.bat` on Windows or `cd backend && python -m uvicorn app.main:app 
 | Sensor gap | Quality label `IMPUTED`, absent forecast and risk, `DEGRADED` state | The system withholds predictions when genuine CGM history is too old. |
 | Recovery | Forecast display resumes once genuine observations return | Versioned replay continues and all sensor-quality events remain auditable. |
 
-Click `Jump to chapter` after choosing each chapter. All checkpoints reset and replay the same `HDT-027` synthetic stream. Repeat any chapter for reproducible results.
+Click **Show chapter** after choosing each chapter. All checkpoints reset and replay the same `HDT-027` synthetic stream. Repeat any chapter for reproducible results.
 
 ## The independent REAL research evidence (separate tab)
 
