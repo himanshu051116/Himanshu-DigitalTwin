@@ -22,8 +22,12 @@ def test_complete_manual_acknowledgements_are_required(tmp_path):
         p=tmp_path/f;p.parent.mkdir(parents=True,exist_ok=True);p.write_text('content')
     m=dict(team_name='Twin Team',college_name='MITS',team_leader_name='Lead',team_members=['Lead'],
            registration_confirmed=True,public_github_repo_url='https://github.com/example/HimanshuDigitalTwin',
-           public_repository_confirmed=True,demo_video_url='https://www.youtube.com/watch?v=abc',
+           public_repository_confirmed=True,demo_video_url='https://www.youtube.com/watch?v=abcdefghijk',
            demo_video_duration_minutes=20,video_link_access_confirmed=True,submission_platform_entry_confirmed=True)
+    # Only a syntactically plausible 11-character video ID is accepted, and
+    # it must appear verbatim in the README. This is an offline fixture,
+    # not evidence of a playable uploaded demonstration.
+    (tmp_path/'README.md').write_text('Demo: '+m['demo_video_url'])
     assert evaluate(tmp_path,m)['gate']=='READY'
     m['video_link_access_confirmed']=False
     assert evaluate(tmp_path,m)['gate']=='NOT_READY'
