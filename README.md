@@ -33,7 +33,7 @@ The demonstrator combines baseline patient context with time-stamped sensor-styl
 
 ![System architecture showing inputs, signal-quality gating, model separation, forecasts and abstention](docs/assets/system-architecture.svg)
 
-The default application runs an in-memory synthetic replay through `ReplaySession`. Timestamped phenotype, CGM-style readings, meals and activity are converted into a versioned state. A sensor-quality check may deliberately suppress forecasts and risk output. Independent research training artifacts are kept separate from the live heuristic demonstration.
+The default application runs a synthetic replay through `ReplaySession`, now isolated into independent ephemeral states per anonymous browser. Timestamped phenotype, CGM-style readings, meals and activity are converted into a versioned state. A sensor-quality check may deliberately suppress forecasts and risk output. Independent research training artifacts are kept separate from the live heuristic demonstration.
 
 [**Implementation map, model boundaries and key API routes →**](docs/ARCHITECTURE_AND_MODELS.md) · [**Critical readiness audit →**](docs/TECHNICAL_AUDIT.md)
 
@@ -145,7 +145,7 @@ The challenge instructions specify the folder naming pattern `Team Name_College 
 
 ## Deployment constraint
 
-**This is a local, single-operator research demonstration, not a multi-tenant service.** The FastAPI app currently keeps its replay sessions in a process-global mutable dictionary. Two browsers controlling the same patient can modify each other's replay, and state is lost on process restart. There is no user authentication, access control, persistent per-user state, or real clinical data-handling system. Do **not** deploy this server publicly as a patient-facing application without addressing these limitations. See the [technical audit](docs/TECHNICAL_AUDIT.md).
+**This is still a local research demonstration, not a production multi-tenant or clinical service.** Browser visits now get separate, anonymous, short-lived replay states with a server-issued HTTP-only cookie. The in-memory store expires idle sessions after 30 minutes and allows at most 32 per process. Session state remains ephemeral, and a multi-worker deployment would split state across processes. No identity, user authentication, durable audit storage or clinical-data controls have been implemented. **Do not deploy it publicly for patient use.** See the [technical audit](docs/TECHNICAL_AUDIT.md).
 
 ## Evidence and safety boundaries
 
