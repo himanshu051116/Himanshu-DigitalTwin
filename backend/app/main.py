@@ -4,13 +4,14 @@ import json
 import os
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from .data import generate_demo_patients
 from .engine import ReplaySession
+from .browser_sessions import BrowserSessionStore, BrowserSession, COOKIE_NAME, SESSION_TTL_SECONDS, SessionCapacityError
 from .schemas import ScenarioRequest
 from .fhir import extract_fhir_phenotype
 from .artifacts import load_best_forecaster, load_transport_forecaster, verify_promotion_gate
@@ -95,10 +96,29 @@ TRANSPORT_MODEL, TRANSPORT_MODEL_LABEL = load_transport_forecaster(ACTIVE_MODEL_
 if ACTIVE_MODEL_DIR and not _allow_transport:
     TRANSPORT_MODEL_LABEL += '; external-transport-not-promoted'
 DEMO = generate_demo_patients()
-SESSIONS = {
-    pid: ReplaySession(pid, p.profile, p.stream, model=MODEL, model_label=MODEL_LABEL, cadence_min=5)
-    for pid,p in DEMO.items()
-}
+BROWSER_SESSIONS = BrowserSessionStore(DEMO, MODEL, MODEL_LABEL)
+
+
+@app.middleware("http")
+async def browser_demo_session(request: Request, call_next):
+    # For the local judge demo, a browser owns its own ephemeral replay state.
+    # This cookie is not proof of identity and must never protect patient records.
+    try:
+        token, state = BROWSER_SESSIONS.obtain(request.cookies.get(COOKIE_NAME))
+    except SessionCapacityError as exc:
+        return JSONResponse(status_code=503, content={"detail": str(exc)})
+    request.state.demo_session = state
+    response = await call_next(request)
+    response.set_cookie(
+        COOKIE_NAME, token, max_age=SESSION_TTL_SECONDS, httponly=True,
+        secure=request.url.scheme == "https", samesite="lax", path="/",
+    )
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+def _browser_state(request: Request) -> BrowserSession:
+    return request.state.demo_session
 
 
 @app.get('/api/health')
@@ -113,8 +133,10 @@ def health():
 
 
 @app.get('/api/patients')
-def patients():
-    return [s.profile for s in SESSIONS.values()]
+def patients(request: Request):
+    state = _browser_state(request)
+    with state.lock:
+        return [s.profile for s in state.patients.values()]
 
 
 
@@ -150,19 +172,21 @@ def real_subjects():
     }
 
 @app.post('/api/real/shanghai/load/{subject_id}')
-def load_real_shanghai(subject_id: str):
+def load_real_shanghai(subject_id: str, request: Request):
     try:
         f = find_shanghai_file(DATA_ROOT/'shanghai', subject_id)
         profile, stream, cadence = build_shanghai_replay(f, BASE_DIR/'data'/'reference'/'shanghai_t2dm_metadata.csv')
     except (FileNotFoundError, ValueError) as exc:
         raise HTTPException(404, str(exc))
     pid = profile['patient_id']
-    SESSIONS[pid] = ReplaySession(pid, profile, stream, model=TRANSPORT_MODEL, model_label=TRANSPORT_MODEL_LABEL, cadence_min=cadence)
-    return SESSIONS[pid].step(1)
+    state = _browser_state(request)
+    with state.lock:
+        state.patients[pid] = ReplaySession(pid, profile, stream, model=TRANSPORT_MODEL, model_label=TRANSPORT_MODEL_LABEL, cadence_min=cadence)
+        return state.patients[pid].step(1)
 
 
 @app.post('/api/real/cgmacros/load/{subject_id}')
-def load_real_cgmacros(subject_id: str):
+def load_real_cgmacros(subject_id: str, request: Request):
     try:
         root = DATA_ROOT/'cgmacros'
         f = find_cgmacros_file(root, subject_id)
@@ -170,26 +194,35 @@ def load_real_cgmacros(subject_id: str):
     except (FileNotFoundError, ValueError) as exc:
         raise HTTPException(404, str(exc))
     pid = profile['patient_id']
-    SESSIONS[pid] = ReplaySession(pid, profile, stream, model=MODEL, model_label=MODEL_LABEL, cadence_min=cadence)
-    return SESSIONS[pid].step(1)
+    state = _browser_state(request)
+    with state.lock:
+        state.patients[pid] = ReplaySession(pid, profile, stream, model=MODEL, model_label=MODEL_LABEL, cadence_min=cadence)
+        return state.patients[pid].step(1)
 
 @app.post('/api/replay/{patient_id}/reset')
-def reset(patient_id: str):
-    if patient_id not in SESSIONS: raise HTTPException(404,'Unknown patient')
-    SESSIONS[patient_id].reset()
-    return SESSIONS[patient_id].step(1)
+def reset(patient_id: str, request: Request):
+    state = _browser_state(request)
+    with state.lock:
+        if patient_id not in state.patients: raise HTTPException(404, 'Unknown patient')
+        session = state.patients[patient_id]
+        session.reset()
+        return session.step(1)
 
 
 @app.post('/api/replay/{patient_id}/step')
-def step(patient_id: str, steps: int = 1):
-    if patient_id not in SESSIONS: raise HTTPException(404,'Unknown patient')
-    return SESSIONS[patient_id].step(min(max(1,steps),24))
+def step(patient_id: str, request: Request, steps: int = 1):
+    state = _browser_state(request)
+    with state.lock:
+        if patient_id not in state.patients: raise HTTPException(404, 'Unknown patient')
+        return state.patients[patient_id].step(min(max(1, steps), 24))
 
 
 @app.get('/api/replay/{patient_id}/snapshot')
-def snapshot(patient_id: str):
-    if patient_id not in SESSIONS: raise HTTPException(404,'Unknown patient')
-    return SESSIONS[patient_id].snapshot()
+def snapshot(patient_id: str, request: Request):
+    state = _browser_state(request)
+    with state.lock:
+        if patient_id not in state.patients: raise HTTPException(404, 'Unknown patient')
+        return state.patients[patient_id].snapshot()
 
 
 # Competition demo is intentionally limited to bundled synthetic profiles.
@@ -214,30 +247,34 @@ def demo_chapters():
 
 
 @app.post('/api/demo/chapter/{chapter_id}')
-def demo_chapter(chapter_id: str, patient_id: str = 'HDT-027'):
+def demo_chapter(chapter_id: str, request: Request, patient_id: str = 'HDT-027'):
     if chapter_id not in DEMO_CHAPTERS:
         raise HTTPException(404, 'Unknown demo chapter')
     if patient_id not in DEMO:
         raise HTTPException(400, 'Guided demo requires a bundled synthetic patient')
-    session = SESSIONS[patient_id]
-    session.reset()
-    minutes, description = DEMO_CHAPTERS[chapter_id]
-    steps = min(len(session.stream), minutes // session.cadence_min + 1)
-    snap = session.step(steps)
-    return {'chapter': chapter_id, 'description': description,
-            'simulation_only': True, 'snapshot': snap,
-            'note': 'Synthetic replay. Do not interpret the demonstration as validated patient-specific predictions.'}
+    state = _browser_state(request)
+    with state.lock:
+        session = state.patients[patient_id]
+        session.reset()
+        minutes, description = DEMO_CHAPTERS[chapter_id]
+        steps = min(len(session.stream), minutes // session.cadence_min + 1)
+        snap = session.step(steps)
+        return {'chapter': chapter_id, 'description': description,
+                'simulation_only': True, 'snapshot': snap,
+                'note': 'Synthetic replay. Do not interpret the demonstration as validated patient-specific predictions.'}
 
 
 @app.post('/api/scenario')
-def scenario(req: ScenarioRequest):
-    if req.patient_id not in SESSIONS: raise HTTPException(404,'Unknown patient')
-    baseline, scenario_values = SESSIONS[req.patient_id].scenario(req.carbs_g,req.activity,req.glucose)
-    return {
-        'baseline': baseline,
-        'scenario': scenario_values,
-        'note':'Exploratory model-based scenario estimate. Not a treatment recommendation or causal effect estimate.',
-    }
+def scenario(req: ScenarioRequest, request: Request):
+    state = _browser_state(request)
+    with state.lock:
+        if req.patient_id not in state.patients: raise HTTPException(404, 'Unknown patient')
+        baseline, scenario_values = state.patients[req.patient_id].scenario(req.carbs_g, req.activity, req.glucose)
+        return {
+            'baseline': baseline,
+            'scenario': scenario_values,
+            'note': 'Exploratory model-based scenario estimate. Not a treatment recommendation or causal effect estimate.',
+        }
 
 
 @app.post('/api/fhir/ingest')
@@ -338,13 +375,21 @@ def evidence():
 
 @app.websocket('/ws/replay/{patient_id}')
 async def ws_replay(websocket: WebSocket, patient_id: str):
+    # WebSockets do not pass through the HTTP cookie-issuing middleware.
+    state = BROWSER_SESSIONS.existing(websocket.cookies.get(COOKIE_NAME))
+    if state is None:
+        await websocket.close(code=4401)
+        return
+    with state.lock:
+        present = patient_id in state.patients
+    if not present:
+        await websocket.close(code=4404)
+        return
     await websocket.accept()
-    if patient_id not in SESSIONS:
-        await websocket.send_json({'error':'Unknown patient'}); await websocket.close(); return
-    session=SESSIONS[patient_id]
     try:
         while True:
-            snap=session.step(1)
+            with state.lock:
+                snap = state.patients[patient_id].step(1)
             await websocket.send_json(snap)
             await asyncio.sleep(1.0)
     except WebSocketDisconnect:
