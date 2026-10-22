@@ -93,6 +93,8 @@ The [independent CGMacros report](backend/reports/research/CGMacros_Real_45_Subj
 
 ## Submission package
 
+[**Open the submission folder's judge index**](submission/README.md) to find the final deck, original screenshots, technical evidence, and outstanding requirements without searching through generated files.
+
 | Open directly | What it contains |
 |---|---|
 | [Judge quick start](JUDGE_START_HERE.md) | Run commands, six test checkpoints, exact expected values |
