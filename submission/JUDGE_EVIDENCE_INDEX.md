@@ -4,6 +4,8 @@
 
 This index distinguishes features a judge can **execute**, research findings reported from a **separate study**, and important **unverified** claims. Nothing here certifies a clinical device.
 
+**Actual application states:** [valid synthetic lunch checkpoint](Live_Demo_Lunch.png) · [sensor-gap abstention checkpoint](Live_Demo_SensorGap.png), captured through [Playwright](capture_demo.py). The images are real browser screenshots **of simulated data**, not clinical evidence.
+
 **Visual verification aids:** [system architecture](../docs/assets/system-architecture.svg) · [technology stack](../docs/assets/technology-stack.svg) · [independent benchmark chart](../docs/assets/research-evidence.svg). The images are original schematic representations and are **not** screenshots or live model evidence.
 
 ## Verify the working prototype (no real patient dataset required)
@@ -12,10 +14,9 @@ From the public repository **root**:
 
 ```bash
 python -m pip install -r backend/requirements.txt
-python backend/scripts/verify_judge_submission.py --out submission/trace_reproduction_v022.json
+python backend/scripts/verify_judge_submission.py
 python -m pytest backend/tests -q
-cd backend
-python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
 ```
 
 Open `http://127.0.0.1:8000` and navigate the six **Guided judge demo** checkpoints, especially **Sensor gap**. Run `node --check backend/static/app.js` to check frontend syntax if Node is available.
