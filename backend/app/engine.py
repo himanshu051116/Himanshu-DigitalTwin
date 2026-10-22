@@ -197,7 +197,13 @@ class ReplaySession:
             'personal_bias': self.adapter.flat_biases(),
             'explanations': [] if self._must_abstain() else self.model.explanation(f, self.profile),
             'explanation_method': 'unavailable-insufficient-sensor-data' if self._must_abstain() else 'input-context-summary',
-            'recent_history': list(self.history)[-36:],
+            # Model internals may carry the last valid glucose over short sensor gaps.
+            # Exposed observed history MUST NOT claim those carried values are measured.
+            'recent_history': [
+                {**sample, 'glucose': (sample.get('glucose')
+                                      if sample.get('quality') == 'VALID' else None)}
+                for sample in list(self.history)[-36:]
+            ],
             'timeline': list(self.timeline)[:12],
             'audit': [vars(p) for p in self.pending if p.resolved][-12:],
             'model_info': (self.model.metadata() if hasattr(self.model, 'metadata') else {'mode': self.model_label, 'trained': False}),
