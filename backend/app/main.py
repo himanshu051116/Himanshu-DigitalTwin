@@ -108,7 +108,8 @@ async def browser_demo_session(request: Request, call_next):
         path.startswith("/api/replay/") or path.startswith("/api/demo/") or
         path == "/api/scenario" or path.startswith("/api/real/")
     )
-    if not stateful:
+    # CORS preflights cannot establish a browser session and should consume no slot.
+    if request.method == 'OPTIONS' or not stateful:
         return await call_next(request)
     # For the local judge demo, a browser owns its own ephemeral replay state.
     # This cookie is not proof of identity and must never protect patient records.
