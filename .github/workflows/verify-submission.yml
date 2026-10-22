@@ -61,3 +61,6 @@ jobs:
       - name: Check TypeScript source
         working-directory: frontend
         run: npx tsc --noEmit
+      - name: Build optional Next.js dashboard
+        working-directory: frontend
+        run: npm run build
