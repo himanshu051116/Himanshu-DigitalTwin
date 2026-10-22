@@ -28,6 +28,17 @@
     <small class="judge-info">Shows honest prediction, verification, sensor safety and recovery.</small>
   </section>
 
+  <section class="signal-flow card" aria-label="Realtime replay processing status" aria-live="polite">
+    <div class="signal-flow-heading"><strong>From reading to forecast</strong><span id="signalSummary">Waiting for replay data</span></div>
+    <div class="signal-flow-stages">
+      <div class="signal-stage"><span class="signal-number">01 / OBSERVATION</span><strong id="signalInput">—</strong><small>Current CGM evidence</small></div>
+      <div class="signal-arrow" aria-hidden="true">→</div>
+      <div class="signal-stage"><span class="signal-number">02 / QUALITY</span><strong id="signalQuality">—</strong><small id="signalAge">Minutes since valid CGM: —</small></div>
+      <div class="signal-arrow" aria-hidden="true">→</div>
+      <div class="signal-stage"><span class="signal-number">03 / OUTPUT</span><strong id="signalOutput">—</strong><small>Illustrative only · not clinical</small></div>
+    </div>
+  </section>
+
   <div id="viewTwin" class="view">
     <section class="metric-grid">
       <article class="card metric"><span class="eyebrow">Current glucose</span><div id="glucose" class="big">—</div><div class="subrow"><span id="qualityBadge" class="badge">—</span><span id="timeNow">—</span></div></article>
