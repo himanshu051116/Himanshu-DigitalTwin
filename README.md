@@ -1,5 +1,9 @@
 # HimanshuDigitalTwin
 
+![HimanshuDigitalTwin — patient-specific glucose research prototype](docs/assets/hero.svg)
+
+[**Judge quick start**](JUDGE_START_HERE.md) · [**Architecture**](docs/ARCHITECTURE_AND_MODELS.md) · [**Presentation PDF**](submission/HimanshuDigitalTwin_Presentation.pdf) · [**Research evidence**](submission/JUDGE_EVIDENCE_INDEX.md) · [**Submission status**](SUBMISSION_CHECKLIST.md)
+
 **Team:** himanshusubh1510  
 **Presenter:** Himanshu Shukla  
 **College:** Madhav Institute of Technology and Science (MITS), Gwalior  
@@ -7,6 +11,13 @@
 **Project:** Patient-specific glucose forecasting and sensor-quality-aware monitoring
 
 > **Research demonstration, not a clinical device.** The interactive walkthrough uses simulated patient observations and illustrative, uncalibrated forecasts. It must not be used for diagnosis, treatment or insulin dosing.
+
+| What you can inspect | Current evidence |
+|---|---|
+| **Working browser demonstration** | Six deterministic simulated replay chapters, including sensor-gap abstention and recovery |
+| **Forecast scope** | 30-, 60-, 120-minute research scenarios and an illustrative two-hour excursion warning target |
+| **Research benchmark** | A separate patient-grouped CGMacros experiment; **not** the active demo forecaster |
+| **Submission state** | GitHub source and diagrams available; unlisted video, registered roster and Unstop acceptance are **not confirmed** |
 
 ## The problem
 
@@ -17,6 +28,14 @@ A glucose reading describes the **present**, but not what will happen after a me
 ## What the prototype does
 
 The demonstrator combines baseline patient context with time-stamped sensor-style observations, updates a patient-specific digital state, displays a forecast and contextual contributors, and records outcomes for later comparison. It **withholds the forecast and risk** during the demonstrated missing/stale sensor condition. The guided replay is deterministic and uses **synthetic data**, so judges can run it without downloading medical records.
+
+## System architecture
+
+![System architecture showing inputs, signal-quality gating, model separation, forecasts and abstention](docs/assets/system-architecture.svg)
+
+The default application runs an in-memory synthetic replay through `ReplaySession`. Timestamped phenotype, CGM-style readings, meals and activity are converted into a versioned state. A sensor-quality check may deliberately suppress forecasts and risk output. Independent research training artifacts are kept separate from the live heuristic demonstration.
+
+[**Implementation map, model boundaries and key API routes →**](docs/ARCHITECTURE_AND_MODELS.md)
 
 ### Start the working prototype
 
@@ -31,6 +50,10 @@ python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 Open **http://127.0.0.1:8000** and select the **Guided judge demo**. Explore a valid forecast, sensor-data loss, forecast abstention and recovery.
 
 ## Technical stack
+
+![Technology stack: FastAPI backend and vanilla JS demo, separate scikit-learn research and Next.js source](docs/assets/technology-stack.svg)
+
+**Default demo:** `backend/app/` and `backend/static/` run together under FastAPI. **Alternate frontend:** `frontend/` contains a separate Next.js/React interface and is not required for the judge walkthrough. The research pipeline is **not** automatically deployed or promoted into either interface.
 
 | Layer | Technology and purpose |
 |---|---|
@@ -49,6 +72,8 @@ The **canonical research training implementation** uses `HistGradientBoostingReg
 
 ### Independent research evidence
 
+![Comparison of independent CGMacros model and persistence MAE, with 30-, 60-, 120-minute results and research caveat](docs/assets/research-evidence.svg)
+
 A separate experiment involving **45 CGMacros participants** (14 with Type-2 diabetes) reported the following **primary subject-holdout** results. Units are MAE in mg/dL; smaller is better.
 
 | Horizon | Persistence baseline | Study ML model | Relative MAE reduction |
@@ -59,12 +84,39 @@ A separate experiment involving **45 CGMacros participants** (14 with Type-2 dia
 
 Only **three Type-2 diabetes participants** were in the primary ten-person holdout; these are **pooled-cohort findings**, not T2D-only or clinical-validation statistics. Personalization and uncertainty intervals did not meet their own acceptance criteria. Shanghai external validation remains incomplete. See [research evidence](backend/reports/research/) and [judge evidence index](submission/JUDGE_EVIDENCE_INDEX.md).
 
+## Repository map
+
+| Path | What it contains |
+|---|---|
+| [`backend/app/`](backend/app/) | FastAPI routes, synthetic patient stream, replay engine, sensor and model safeguards |
+| [`backend/static/`](backend/static/) | Default dashboard, browser interaction and trajectory charts |
+| [`backend/scripts/`](backend/scripts/) | Evidence verification, model training tooling and readiness checks |
+| [`backend/tests/`](backend/tests/) | Automated replay, input-quality and artifact-gate regression coverage |
+| [`frontend/`](frontend/) | Optional Next.js / React / TypeScript interface, **not** the default judge demo |
+| [`backend/reports/research/`](backend/reports/research/) | Independent study reports; not original independent training scripts or participant datasets |
+| [`docs/assets/`](docs/assets/) | Original, vector README graphics (editable SVG) |
+| [`submission/`](submission/) | Architecture PDF, six-slide deck, demonstration plan, evidence index and metadata |
+
+## Judge verification in one session
+
+Start the demo using the commands above. Select the six **Guided judge demo** chapters and verify that the sensor-gap chapter has an absent glucose value, no forecast, and no excursion risk. The separate study metrics are available for inspection under **Evidence & safety**, but cannot be claimed as live-model accuracy.
+
+From the repository **root**, run:
+
+```bash
+python backend/scripts/verify_judge_submission.py
+python -m pytest backend/tests -q
+python backend/scripts/submission_readiness.py
+```
+
+The readiness checker is expected to report **NOT_READY** until the real video and registration/submission attestations exist. Its failure exit code is intentional in that state; it does not mean the replay itself failed. Tests validate software behavior, **not** clinical efficacy.
+
 ## Submission files
 
 | Required item | Public repository link |
 |---|---|
 | Judge quick start | [JUDGE_START_HERE.md](JUDGE_START_HERE.md) |
-| Architecture diagram | [PDF](submission/architecture.pdf) |
+| Architecture diagram | [PDF](submission/architecture.pdf) · [editable SVG](docs/assets/system-architecture.svg) · [source-component guide](docs/ARCHITECTURE_AND_MODELS.md) |
 | Six-slide presentation | [PDF](submission/HimanshuDigitalTwin_Presentation.pdf) · [PPTX](submission/HimanshuDigitalTwin_Presentation.pptx) · [browser source](submission/Presentation.html) |
 | Project and outcome explanation | [Presentation overview](submission/PRESENTATION_OVERVIEW.md) |
 | Demonstration guidance | [minimum-20-minute recording plan](submission/VIDEO_RECORDING_PLAN.md) |
@@ -90,13 +142,14 @@ The challenge instructions specify the folder naming pattern `Team Name_College 
 - **Incubator:** not confirmed; no incubation claim is made
 - **Licence:** [MIT](LICENSE). The third-party research datasets are governed by their own source terms and are not redistributed with the repository.
 
-## Reproducibility
+## Evidence and safety boundaries
 
-```bash
-python backend/scripts/verify_judge_submission.py
-python -m pytest backend/tests -q
-```
+- All values in the default interactive replay are **synthetic**; its heuristic forecasts and displayed risk estimates are **uncalibrated**.
+- The independent CGMacros result is from a **separate experiment**, not a trained model promoted into the running demo. Original study training scripts and participant-level data are not provided here.
+- The primary study holdout contains only **3 participants with Type-2 diabetes**. Do not treat pooled-cohort accuracy as diabetes-specific or clinical validation.
+- Personalization and nominal uncertainty intervals **did not pass** their acceptance gates. Shanghai external validation is **incomplete**.
+- No real medical records, identifiable sensor exports, personal credentials, or private dataset contents should be committed to GitHub.
 
-The automated checks establish **software behavior**, not clinical efficacy, real-world treatment benefit or reproducibility of the separate independent study. The saved benchmark report is not a substitute for its original training artifacts.
+See the [judge evidence index](submission/JUDGE_EVIDENCE_INDEX.md) for what is reproducible and what remains unverified.
 
 **Submission status:** Public project files exist on GitHub. An actual unlisted video link, any missing registered-team details, and confirmation of the competition-platform submission are still pending. See [SUBMISSION_CHECKLIST.md](SUBMISSION_CHECKLIST.md).
