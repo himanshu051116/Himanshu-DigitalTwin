@@ -28,6 +28,10 @@ Open **http://127.0.0.1:8000**, then use **Guided judge demo** (the FastAPI-serv
 
 The sensor gap should produce `quality=IMPUTED`, `glucose=null`, `forecast_status=ABSTAINED`, `excursion_risk=null` and an empty `forecasts` array. A missing reading must **never** be presented as 0% risk.
 
+## Replay isolation check
+
+Use two browser profiles to verify that one profile's synthetic replay changes do not affect the other. Two tabs within a single profile share the same cookie. Automated checks are in `backend/tests/test_browser_session_isolation.py`. These temporary demo sessions are not accounts or persistent storage.
+
 ## Independently check software behavior
 
 From the **repository root**:
