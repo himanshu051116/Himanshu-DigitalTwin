@@ -16,28 +16,46 @@ type Snap = {
 function fmtTime(v:string){ return new Date(v).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }
 function n(v:number|null|undefined, digits=0){ return typeof v==='number' && Number.isFinite(v) ? v.toFixed(digits) : '—'; }
 
-function MiniChart({history, forecasts}:{history:any[]; forecasts:Forecast[]}){
-  const W=820,H=255,pad=34;
-  const pts=history.filter(x=>typeof x.glucose==='number');
-  const values=[...pts.map(x=>x.glucose), ...forecasts.map(x=>x.personalized), ...forecasts.map(x=>x.lower), ...forecasts.map(x=>x.upper)];
-  const min=Math.min(90,...values)-10,max=Math.max(180,...values)+10;
-  const y=(v:number)=>H-pad-(v-min)/(max-min)*(H-pad*2);
-  const x=(i:number,total:number)=>pad+i/(Math.max(1,total-1))*(W-pad*2);
-  const histPath=pts.map((p,i)=>(i?'L':'M')+`${x(i,pts.length+3)},${y(p.glucose)}`).join(' ');
-  const startX=pts.length?x(pts.length-1,pts.length+3):pad;
-  const predXs=forecasts.map((_,i)=>x(pts.length+i,pts.length+3));
-  const currentY=y(pts.at(-1)?.glucose||forecasts[0]?.personalized||120);
-  const predPath=`M${startX},${currentY} `+forecasts.map((f,i)=>`L${predXs[i]},${y(f.personalized)}`).join(' ');
-  const upper=[{x:startX,y:y(pts.at(-1)?.glucose||forecasts[0]?.personalized||120)},...forecasts.map((f,i)=>({x:predXs[i],y:y(f.upper)}))];
-  const lower=[...forecasts.map((f,i)=>({x:predXs[i],y:y(f.lower)})).reverse(),{x:startX,y:y(pts.at(-1)?.glucose||forecasts[0]?.personalized||120)}];
-  const band=[...upper,...lower].map((p,i)=>(i?'L':'M')+`${p.x},${p.y}`).join(' ')+' Z';
-  return <svg className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Observed and forecast glucose trajectory">
-    {[100,140,180,220].filter(v=>v>min&&v<max).map(v=><g key={v}><line x1={pad} x2={W-pad} y1={y(v)} y2={y(v)} className="grid"/><text x="4" y={y(v)+4} className="axis">{v}</text></g>)}
-    {forecasts.length>0 && <path d={band} className="uncertainty"/>}
-    <path d={histPath} className="observed"/><path d={predPath} className="predicted"/>
-    {forecasts.map((f,i)=><g key={f.horizon_min}><circle cx={predXs[i]} cy={y(f.personalized)} r="4.5" className="forecastDot"/><text x={predXs[i]-16} y={H-8} className="axis">+{f.horizon_min}m</text></g>)}
-    <text x={pad} y="16" className="legend">Observed</text><text x={pad+80} y="16" className="legend predictedText">Forecast + uncertainty</text>
-  </svg>
+type HistoryReading = { timestamp:string; glucose:number|null; quality:string };
+
+function MiniChart({history,forecasts,timestamp,validReading}:{history:HistoryReading[];forecasts:Forecast[];timestamp:string;validReading:number|null}){
+  const W=820,H=255,pad=35;
+  const now=Date.parse(timestamp);
+  const earliest=history.length?Date.parse(history[0].timestamp):now;
+  const from=Number.isFinite(earliest)?Math.min(earliest,now):now-5*60*1000;
+  const until=now+120*60*1000;
+  const at=(t:number)=>pad+(Math.max(from,Math.min(until,t))-from)/Math.max(1,until-from)*(W-2*pad);
+  const actual=history.filter(p=>p.quality==='VALID'&&typeof p.glucose==='number'&&Number.isFinite(p.glucose));
+  const vals=[...actual.map(p=>p.glucose as number),...forecasts.flatMap(f=>[f.personalized,f.lower,f.upper])];
+  const low=Math.min(90,...vals)-10,high=Math.max(180,...vals)+10;
+  const y=(v:number)=>H-pad-(v-low)/Math.max(1,high-low)*(H-2*pad);
+  let obs='',disconnected=true;
+  for(const p of history){
+    const t=Date.parse(p.timestamp);
+    if(p.quality!=='VALID'||typeof p.glucose!=='number'||!Number.isFinite(t)){
+      disconnected=true;continue;
+    }
+    obs+=(disconnected?'M':'L')+`${at(t)},${y(p.glucose)} `;
+    disconnected=false;
+  }
+  const mayForecast=validReading!==null && Number.isFinite(validReading) && forecasts.length>0;
+  const first=mayForecast?{x:at(now),y:y(validReading as number)}:null;
+  const points=first?forecasts.map(f=>({x:at(now+f.horizon_min*60000),y:y(f.personalized),upper:y(f.upper),lower:y(f.lower),h:f.horizon_min})):[];
+  const pred=first?'M'+first.x+','+first.y+' '+points.map(p=>'L'+p.x+','+p.y).join(' '):'';
+  const band=first&&points.length?
+    'M'+first.x+','+first.y+' '+points.map(p=>'L'+p.x+','+p.upper).join(' ')+
+    ' '+[...points].reverse().map(p=>'L'+p.x+','+p.lower).join(' ')+
+    ' L'+first.x+','+first.y+' Z':'';
+  return <svg className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={first?'Glucose observations without imputed readings; illustrative forecasts spaced by elapsed minutes':'Observed valid glucose only; missing data omitted and forecast withheld'}>
+    {[100,140,180,220].filter(v=>v>low&&v<high).map(v=><g key={v}><line x1={pad} x2={W-pad} y1={y(v)} y2={y(v)} className="grid"/><text x="3" y={y(v)+4} className="axis">{v}</text></g>)}
+    {band && <path d={band} className="uncertainty"/>}
+    <path d={obs.trim()} className="observed"/>
+    {pred && <path d={pred} className="predicted"/>}
+    {points.map(p=><g key={p.h}><circle cx={p.x} cy={p.y} r="4.5" className="forecastDot"/><text x={p.x-18} y={H-6} className="axis">+{p.h}m</text></g>)}
+    <text x={pad} y="16" className="legend">Valid observed CGM only</text>
+    {first && <text x={pad+210} y="16" className="legend predictedText">Illustrative forecast</text>}
+    {history.some(p=>p.quality!=='VALID') && <text x={W-168} y="16" className="legend">Gaps omitted</text>}
+  </svg>;
 }
 
 function Badge({children,tone='neutral'}:{children:React.ReactNode;tone?:string}){ return <span className={`badge ${tone}`}>{children}</span>; }
@@ -79,7 +97,7 @@ export default function Home(){
         <div className="card metric"><div className="eyebrow">Personalization</div><div className="big">{improvement===null?'Learning':`${Math.max(-99,improvement).toFixed(1)}%`}</div><div className="subrow"><span>{improvement===null?'Awaiting resolved forecasts':'MAE improvement vs population'}</span></div></div>
       </section>
       <section className="mainGrid">
-        <div className="card chartCard"><div className="sectionHead"><div><h2>Observed → forecast trajectory</h2><p>Simulated replay with illustrative, uncalibrated intervals</p></div><Badge>{snap.forecasts.length ? `${snap.confidence} · simulated` : 'Forecast withheld'}</Badge></div><MiniChart history={snap.recent_history} forecasts={snap.forecasts}/><div className="forecastRows">{snap.forecasts.map(f=><div key={f.horizon_min}><span>+{f.horizon_min} min</span><strong>{f.personalized} mg/dL</strong><small>population {f.population} · interval {f.lower}–{f.upper}</small></div>)}</div></div>
+        <div className="card chartCard"><div className="sectionHead"><div><h2>Observed → forecast trajectory</h2><p>Simulated replay with illustrative, uncalibrated intervals</p></div><Badge>{snap.forecasts.length ? `${snap.confidence} · simulated` : 'Forecast withheld'}</Badge></div><MiniChart history={snap.recent_history} forecasts={snap.forecasts} timestamp={snap.timestamp} validReading={snap.reading.quality==='VALID'?snap.reading.glucose:null}/><div className="forecastRows">{snap.forecasts.map(f=><div key={f.horizon_min}><span>+{f.horizon_min} min</span><strong>{f.personalized} mg/dL</strong><small>population {f.population} · interval {f.lower}–{f.upper}</small></div>)}</div></div>
         <div className="card"><div className="sectionHead"><div><h2>Why the twin changed</h2><p>Transparent directional contributors</p></div></div><div className="drivers">{snap.explanations.map(e=><div key={e.factor}><span>{e.factor}</span><div className="bar"><i style={{width:`${Math.max(6,e.strength*100)}%`}} className={e.direction==='down'?'down':''}/></div><b>{e.direction==='up'?'↑':'↓'}</b></div>)}</div><hr/><div className="facts"><div><span>Active carbs</span><b>{snap.reading.carbs_active_g} g</b></div><div><span>Minutes since meal</span><b>{snap.reading.minutes_since_meal ?? '—'}</b></div><div><span>FHIR/EHR phenotype</span><b>Adapter-ready</b></div></div></div>
       </section>
       <section className="lowerGrid">
