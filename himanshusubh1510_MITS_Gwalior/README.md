@@ -18,6 +18,14 @@ This directory follows the organizer's **Team Name_College Name** naming convent
 | Open-source software terms | [MIT License](../LICENSE) |
 | Requirement-by-requirement status | [Submission checklist](../SUBMISSION_CHECKLIST.md) |
 
+## Visual technical evidence
+
+![Architecture overview](../docs/assets/system-architecture.svg)
+
+- [Technology stack SVG](../docs/assets/technology-stack.svg)
+- [Separate CGMacros evidence visualization](../docs/assets/research-evidence.svg)
+- [Detailed implementation and model governance](../docs/ARCHITECTURE_AND_MODELS.md)
+
 ## Demonstration recording
 
 **Unlisted YouTube link: not yet supplied.** The public competition guidelines require a **minimum 20-minute** video. [The recording guide](../submission/VIDEO_RECORDING_PLAN.md) is not a substitute for an uploaded video. Only post a working link after it is recorded and access checked without credentials.
