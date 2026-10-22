@@ -1,6 +1,6 @@
 # HimanshuDigitalTwin — reproducible jury demonstration
 
-**Presenting team:** Algonauts. Individual presenters and registration status are to be confirmed.
+**Presenting team:** himanshusubh1510. **Presenter:** Himanshu Shukla (as documented in the repository). Official team roster, registered leader and registration status still require verification against the Unstop entry.
 
 **Scope:** Happiest Health Digital Twin Challenge 2026. This six-chapter story runs entirely on deterministic **simulated** patients. It does **not** use the independent CGMacros study's fitted research models in the live demo. The app never recommends insulin or treatment.
 
