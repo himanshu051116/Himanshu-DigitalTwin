@@ -67,15 +67,19 @@ Only **three Type-2 diabetes participants** were in the primary ten-person holdo
 | Architecture diagram | [PDF](submission/architecture.pdf) |
 | Six-slide presentation | [PDF](submission/HimanshuDigitalTwin_Presentation.pdf) · [PPTX](submission/HimanshuDigitalTwin_Presentation.pptx) · [browser source](submission/Presentation.html) |
 | Project and outcome explanation | [Presentation overview](submission/PRESENTATION_OVERVIEW.md) |
-| Demonstration guidance | [15–20-minute recording plan](submission/VIDEO_RECORDING_PLAN.md) |
+| Demonstration guidance | [minimum-20-minute recording plan](submission/VIDEO_RECORDING_PLAN.md) |
 | Open-source licence | [MIT Licence](LICENSE) |
 | Submission acceptance checklist | [SUBMISSION_CHECKLIST.md](SUBMISSION_CHECKLIST.md) |
 
 ## Demonstration video — pending
 
-**Unlisted YouTube video (15–20 minutes): NOT YET PROVIDED.**
+**Demonstration video (minimum 20 minutes): NOT YET PROVIDED.**
 
-The video URL has **not** been supplied or verified. Once the video is genuinely uploaded, add its direct `https://www.youtube.com/watch?v=...` or `https://youtu.be/...` link **here** and in `submission/submission_metadata.json`. Confirm that it is accessible without logging into the uploader's account. Do not treat the recording plan as a substitute for the video.
+The video URL has **not** been supplied or verified. The official public guidelines specify **a minimum duration of 20 minutes**, rather than a 15–20-minute limit. Once the video is genuinely uploaded, add its direct `https://www.youtube.com/watch?v=...` or `https://youtu.be/...` link **here** and in `submission/submission_metadata.json`. Confirm that it is accessible without logging into the uploader's account. Do not treat the recording plan as a substitute for the video.
+
+### Organizer packaging requirement
+
+The challenge instructions specify the folder naming pattern `Team Name_College Name`. The current repository remains named `Himanshu-DigitalTwin`; [the team-and-college submission index](himanshusubh1510_MITS_Gwalior/README.md) groups links using that naming pattern. This index does **not** establish acceptance of the packaging format by the organizer. If the participant dashboard requires the repository itself to be renamed or a specific directory layout, follow those instructions before submission.
 
 ## Team, institution and licence
 
