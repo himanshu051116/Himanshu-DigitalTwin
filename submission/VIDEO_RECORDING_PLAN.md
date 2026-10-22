@@ -1,13 +1,13 @@
-# 15–20-minute demonstration video guide
+# Minimum 20-minute demonstration video guide
 
 **Project:** HimanshuDigitalTwin  
 **Team:** himanshusubh1510  
 **Presenter:** Himanshu Shukla  
 **Institution:** MITS Gwalior
 
-**Video status: NOT RECORDED OR LINKED IN THE REPOSITORY.** This document is a recording plan, **not** an actual video.
+**Video status: NO VERIFIED VIDEO URL IN THE REPOSITORY.** This document is a recording plan, **not** an actual video.
 
-Record the real browser and terminal experience, upload the result to YouTube as **Unlisted**, then add its complete accessible video URL to both the repository root `README.md` and `submission/submission_metadata.json`. Check that the final duration is **15–20 minutes** and the link plays without permissions or sign-in from a separate browser session.
+The [official competition guidelines](https://unstop.com/hackathons/crp-digital-twin-challenge-2026-happiest-health-1757873) specify **a minimum 20-minute** video, not an upper limit of 20 minutes. Record the real browser and terminal experience, upload the result to YouTube as **Unlisted**, then add its complete accessible video URL to both the repository root `README.md` and `submission/submission_metadata.json`. Check that the final duration is **at least 20 minutes** (aim for approximately 21 minutes of substantive recording rather than an exactly 20:00 cut) and the link plays without permissions or sign-in from a separate browser session.
 
 | Timeline | Show on screen | Explain accurately |
 |---|---|---|
@@ -19,7 +19,7 @@ Record the real browser and terminal experience, upload the result to YouTube as
 | 12:00–13:45 | Dashboard explanation and historical verification | Show sensor/data confidence, state changes and later observed outcomes |
 | 13:45–16:30 | Evidence & Safety and research report | The independent 45-subject CGMacros cohort, MAE versus baseline, and its limits |
 | 16:30–18:15 | Repository and code/demo launch | Public README, architecture, presentation and reproducible app startup |
-| 18:15–19:30 | Close and limitations | Simulated interactive demo, not clinically calibrated; trained-model promotion and external validation remain pending |
+| 18:15–20:45 | Live reproducibility checks, questions addressed, and limitations | Show the model-status endpoint, attempt the replay verification script, distinguish the separate CGMacros study from the active demo, then close with the limitations and exact next validation steps |
 
 ## Recording quality and claims
 
@@ -32,7 +32,7 @@ Record the real browser and terminal experience, upload the result to YouTube as
 
 ## Publication action
 
-After a genuine 15–20-minute video is uploaded:
+After a genuine video of **at least 20 minutes** is uploaded:
 
 1. Copy its full `https://www.youtube.com/watch?v=...` or `https://youtu.be/...` link.
 2. Insert the link under the root README's **Demonstration video** heading.
