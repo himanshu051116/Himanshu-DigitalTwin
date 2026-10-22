@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HimanshuDigitalTwin — Hackathon Presentation</title>
+<style>
+:root{--ink:#152a40;--teal:#006d70;--muted:#526477;--paper:#f7f8f5;--line:#cfdae0}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#e8eded;color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+section{background:var(--paper);width:min(1440px,96vw);min-height:min(810px,56.25vw);margin:22px auto;padding:clamp(28px,4.4vw,68px);position:relative;display:flex;flex-direction:column;box-shadow:0 5px 32px #17384b13;overflow:hidden}
+.kicker{font-size:clamp(12px,1.15vw,16px);font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--teal)}
+h1{font-size:clamp(46px,7vw,104px);line-height:.99;letter-spacing:-.05em;margin:24px 0}
+h2{font-size:clamp(30px,4.2vw,65px);line-height:1.04;letter-spacing:-.04em;margin:12px 0 16px}
+p,li{font-size:clamp(17px,1.7vw,25px);line-height:1.37}.lead{color:var(--muted);max-width:880px}
+small,.note{font-size:clamp(12px,1.1vw,17px);color:var(--muted)}.footer{margin-top:auto;padding-top:25px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:20px;font-size:clamp(12px,1vw,15px);color:var(--muted)}
+.row{display:flex;gap:3.5%;align-items:stretch;margin:28px 0;flex:1}.half{flex:1;min-width:0}.big{font-size:clamp(48px,7.4vw,104px);font-weight:800;letter-spacing:-.06em}.accent{color:var(--teal)}
+.rule{border-top:2px solid var(--ink);padding-top:15px}.metric{font-size:clamp(23px,2.5vw,40px);font-weight:700}
+.timeline{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:35px}
+.moment{border-top:3px solid var(--teal);padding:15px 0}.moment b{display:block;font-size:clamp(23px,3vw,44px)}
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:11px;margin-top:58px}
+.step{border-top:3px solid var(--teal);padding:13px 9px 10px 0}.step strong{font-size:clamp(16px,1.7vw,24px);display:block}.step p{font-size:clamp(13px,1.15vw,17px)}
+.diagram-note{margin-top:28px;border-top:1px dashed #71929d;padding-top:14px;color:var(--muted);font-size:clamp(15px,1.3vw,19px)}
+.case{display:flex;gap:4%;align-items:flex-start;margin:34px 0}.case>div{flex:1}
+.status{font-weight:700;font-size:clamp(19px,2vw,30px);border-bottom:3px solid var(--teal);padding-bottom:10px}.bad{border-color:#c0753e}
+.trace{font-size:clamp(18px,2vw,28px);line-height:1.5}
+.bar-row{display:grid;grid-template-columns:90px 1fr 110px;align-items:center;gap:12px;margin:15px 0;font-size:clamp(14px,1.3vw,20px)}
+.track{height:18px;background:#dfe8ea;position:relative}.fill{height:100%;background:var(--teal)}.baseline{height:18px;background:#a6c3d0}
+#nav{position:fixed;right:18px;bottom:18px;z-index:20;display:flex;gap:8px;background:#142c3cf0;border-radius:4px;padding:8px}
+button{border:1px solid #9eb5c0;background:transparent;color:#fff;padding:9px 14px;cursor:pointer;font-weight:700}
+a{color:var(--teal)}@media(max-width:720px){section{min-height:700px}.row,.case{flex-direction:column}.timeline{grid-template-columns:repeat(2,1fr)}.flow{grid-template-columns:repeat(2,1fr)}.footer{flex-wrap:wrap}}
+@media print{@page{size:16in 9in;margin:0}body{background:#fff}section{width:16in;height:9in;min-height:0;margin:0;box-shadow:none;break-after:page;padding:.55in}#nav{display:none}}
+</style>
+</head><body>
+<section id="s1">
+  <div class="kicker">Happiest Health Digital Twin Challenge</div>
+  <h1>Himanshu<span class="accent">DigitalTwin</span></h1>
+  <p class="lead" style="font-size:clamp(25px,2.9vw,42px)">A patient-specific view of what blood glucose may do next.</p>
+  <div style="margin-top:auto;display:flex;gap:45px;align-items:end"><div><div class="big accent">30<span style="font-size:.42em"> / </span>60<span style="font-size:.42em"> / </span>120</div><p>minute glucose forecast horizons</p></div><div class="rule" style="max-width:420px"><p>Connects patient history, glucose readings, meals and wearable observations. Withholds forecasts when the sensor signal is unreliable.</p></div></div>
+  <div class="footer"><span>Team: <b>himanshusubh1510</b></span><span>Himanshu Shukla · MITS Gwalior</span><span>Research demonstrator</span></div>
+</section>
+<section id="s2">
+  <div class="kicker">01 / Clinical problem</div><h2>A glucose reading is a snapshot.<br><span class="accent">The next two hours are not.</span></h2>
+  <p class="lead">Meals, activity, patient phenotype and sensor quality can change what happens after the same starting value.</p>
+  <div class="rule" style="margin-top:36px"><div class="metric">Synthetic patient example · 12:15 PM · 144 mg/dL</div><p class="note">Recent carbohydrate context: 59.7 g · Wearable heart rate: 82 bpm · Illustrative replay, not a calibrated clinical forecast</p></div>
+  <div class="timeline">
+    <div class="moment"><small>NOW</small><b>144</b><small>mg/dL observed</small></div>
+    <div class="moment"><small>+30 MIN</small><b>155.5</b><small>mg/dL forecast</small></div>
+    <div class="moment"><small>+60 MIN</small><b>156.0</b><small>mg/dL forecast</small></div>
+    <div class="moment"><small>+120 MIN</small><b>145.4</b><small>mg/dL forecast</small></div>
+  </div>
+  <div class="footer"><span>HimanshuDigitalTwin</span><span>All values on this slide: synthetic demo</span><span>02 / 06</span></div>
+</section>
+<section id="s3">
+  <div class="kicker">02 / System architecture</div><h2>One patient state.<br><span class="accent">Continuously revised evidence.</span></h2>
+  <div class="flow">
+    <div class="step"><strong>Patient history</strong><p>Phenotype, HbA1c and baseline patterns</p></div>
+    <div class="step"><strong>Observations</strong><p>CGM readings, meals, wearable activity</p></div>
+    <div class="step"><strong>State update</strong><p>Time-aligned patient context and quality checks</p></div>
+    <div class="step"><strong>Forecast</strong><p>30 / 60 / 120-minute glucose scenarios</p></div>
+    <div class="step"><strong>Clinician view</strong><p>Trend, contributing context and availability</p></div>
+  </div>
+  <p class="diagram-note"><b>Safety path:</b> unreliable or stale glucose → withhold prediction. <b>Feedback path:</b> a later measured glucose value is compared with the forecast issued earlier; the result becomes part of the audit record.</p>
+  <div class="footer"><span>Python · FastAPI · pandas · scikit-learn · HTML / JavaScript</span><span>03 / 06</span></div>
+</section>
+<section id="s4">
+  <div class="kicker">03 / Interactive prototype</div><h2>From observation to forecast<br><span class="accent">on a clinician-facing screen.</span></h2>
+  <div class="row">
+    <div class="half rule"><div class="big" style="font-size:clamp(48px,6.5vw,85px)">144<span style="font-size:.33em"> mg/dL</span></div><p>Valid synthetic glucose reading, 12:15 PM</p><p class="note">The dashboard displays the recent glucose trajectory and forecasts, with contributing meal and activity context.</p></div>
+    <div class="half rule"><div class="metric accent">Forecast horizon</div><div class="trace">30 min → 155.5 mg/dL<br>60 min → 156.0 mg/dL<br>120 min → 145.4 mg/dL</div><p class="note">The default interactive replay is simulated. An uncalibrated two-hour risk percentage is displayed only as illustrative.</p></div>
+  </div>
+  <p><b>See the original product:</b> run the FastAPI application and select “Guided judge demo.”</p>
+  <div class="footer"><span>Research prototype · not for clinical decision making</span><span>04 / 06</span></div>
+</section>
+<section id="s5">
+  <div class="kicker">04 / Distinguishing behavior</div><h2>Sometimes the safest prediction<br><span class="accent">is no prediction.</span></h2>
+  <div class="case">
+    <div><div class="status">12:15 PM · Valid signal</div><p class="big accent" style="font-size:clamp(46px,5vw,80px)">144 mg/dL</p><p class="trace">Current glucose observed<br>30 / 60 / 120-minute forecasts shown</p></div>
+    <div><div class="status bad">2:25 PM · Sensor issue</div><p class="big" style="font-size:clamp(46px,5vw,80px);color:#a15d3f">Unavailable</p><p class="trace">No verified glucose<br>Forecast and excursion risk withheld</p></div>
+  </div>
+  <p class="lead">The demonstration includes a 15-minute sensor-freshness rule and rejects missing or unreliable glucose rather than showing a deceptively precise forecast.</p>
+  <div class="footer"><span>Both states reproduced in the synthetic guided replay</span><span>05 / 06</span></div>
+</section>
+<section id="s6">
+  <div class="kicker">05 / Independent research evidence</div><h2>Measured improvement over<br><span class="accent">a simple persistence baseline.</span></h2>
+  <p class="note">Separate CGMacros study · 45 participants, including 14 with Type-2 diabetes · primary patient-grouped holdout: 10 participants (3 with T2D) · lower MAE is better</p>
+  <div style="margin:14px 0 8px"><div class="bar-row"><b>30 min</b><div><div class="baseline" style="width:45.7%"></div><div class="fill" style="width:40.3%;margin-top:3px"></div></div><b>14.82 / 13.09</b></div>
+  <div class="bar-row"><b>60 min</b><div><div class="baseline" style="width:70.7%"></div><div class="fill" style="width:64%;margin-top:3px"></div></div><b>22.94 / 20.77</b></div>
+  <div class="bar-row"><b>120 min</b><div><div class="baseline" style="width:100%"></div><div class="fill" style="width:85.2%;margin-top:3px"></div></div><b>32.46 / 27.67</b></div></div>
+  <p class="note">Bars: gray = persistence MAE, teal = research model MAE; units mg/dL; three forecast horizons. Study reductions: 11.65%, 9.47%, 14.76% respectively.</p>
+  <div class="rule"><p style="font-size:clamp(15px,1.45vw,21px)"><b>Scientific boundary:</b> these results are from an independent research experiment, not the model running in the simulated dashboard. Personalized adaptation and trained uncertainty intervals have not passed approval gates. No clinical efficacy or deployment approval is claimed.</p></div>
+  <div class="footer"><span><a href="../backend/reports/research/CGMacros_Real_45_Subject_Evidence_Report_2026-10-12.md">Independent evidence report</a></span><span>06 / 06</span></div>
+</section>
+<div id="nav"><button id="prev" aria-label="Previous slide">←</button><button id="next" aria-label="Next slide">→</button><button onclick="window.print()" aria-label="Print or save PDF">PDF</button></div>
+<script>
+let index=0;const slides=[...document.querySelectorAll("section")];function go(n){index=Math.max(0,Math.min(slides.length-1,n));slides[index].scrollIntoView({behavior:"smooth"});}document.getElementById("prev").onclick=()=>go(index-1);document.getElementById("next").onclick=()=>go(index+1);window.addEventListener("keydown",e=>{if(["ArrowRight","PageDown"," "].includes(e.key)){e.preventDefault();go(index+1)}else if(["ArrowLeft","PageUp"].includes(e.key)){e.preventDefault();go(index-1)}});new IntersectionObserver(entries=>{for(const e of entries)if(e.isIntersecting&&e.intersectionRatio>.65)index=slides.indexOf(e.target)},{threshold:[.65]}).observe(slides[0]);for(const s of slides.slice(1)){new IntersectionObserver(entries=>{for(const e of entries)if(e.isIntersecting&&e.intersectionRatio>.65)index=slides.indexOf(e.target)},{threshold:[.65]}).observe(s)}
+</script></body></html>
