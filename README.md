@@ -112,13 +112,19 @@ python backend/scripts/submission_readiness.py
 
 The readiness checker is expected to report **NOT_READY** until the real video and registration/submission attestations exist. Its failure exit code is intentional in that state; it does not mean the replay itself failed. Tests validate software behavior, **not** clinical efficacy.
 
+## Judge presentation — editable PowerPoint
+
+The deck has been rebuilt as **six native editable slides** using Python PowerPoint objects. The introduction now illustrates the synthetic glucose scenario; the architecture shows an actual input–state–quality–output flow; the safety slide makes withheld forecasts prominent; and independent CGMacros statistics remain explicitly separate from the live demo. [Review its slide-by-slide design and source](submission/PRESENTATION_OVERVIEW.md).
+
+The previous [`Presentation.html`](submission/Presentation.html) is an earlier browser-slide draft and is **not** the canonical submission presentation. New slides have no invented clinical dashboard screenshots. A live screenshot/video still requires genuine capture.
+
 ## Submission files
 
 | Required item | Public repository link |
 |---|---|
 | Judge quick start | [JUDGE_START_HERE.md](JUDGE_START_HERE.md) |
 | Architecture diagram | [PDF](submission/architecture.pdf) · [editable SVG](docs/assets/system-architecture.svg) · [source-component guide](docs/ARCHITECTURE_AND_MODELS.md) |
-| Six-slide presentation | [PDF](submission/HimanshuDigitalTwin_Presentation.pdf) · [PPTX](submission/HimanshuDigitalTwin_Presentation.pptx) · [browser source](submission/Presentation.html) |
+| Six-slide presentation | [Editable PPTX](submission/HimanshuDigitalTwin_Presentation.pptx) · [PDF](submission/HimanshuDigitalTwin_Presentation.pdf) · [six-slide preview](submission/Preview_All_Six_Slides.png) · [native slide generator](submission/generate_native_deck.py) |
 | Project and outcome explanation | [Presentation overview](submission/PRESENTATION_OVERVIEW.md) |
 | Demonstration guidance | [minimum-20-minute recording plan](submission/VIDEO_RECORDING_PLAN.md) |
 | Open-source licence | [MIT Licence](LICENSE) |
