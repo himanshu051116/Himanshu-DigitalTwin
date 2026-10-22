@@ -6,7 +6,7 @@
 
 ## Before recording
 
-Run `run_local.bat` on Windows or `cd backend && python -m uvicorn app.main:app --host 127.0.0.1 --port 8000`; navigate to `http://127.0.0.1:8000` and verify the model status says **demo heuristic** and **not promoted**. Use an incognito/private browser window to verify a public repository and unlisted-video link before submitting. Do not upload real patient records or sensor CSVs into GitHub.
+From the repository root, first install dependencies with `python -m pip install -r backend/requirements.txt`, then run `run_local.bat` on Windows, `bash run_local.sh` on Linux/macOS, or `python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000`; navigate to `http://127.0.0.1:8000` and verify the model status says **demo heuristic** and **not promoted**. Use an incognito/private browser window to verify a public repository and unlisted-video link before submitting. Do not upload real patient records or sensor CSVs into GitHub.
 
 ## Guided story (the selector above the replay buttons)
 
