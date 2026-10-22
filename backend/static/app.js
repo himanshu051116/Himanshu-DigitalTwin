@@ -8,11 +8,20 @@ const badgeTone=(el,tone)=>{el.className='badge '+tone};
 
 async function init(){
  const patients=await api('/api/patients');
+ if(!Array.isArray(patients)||patients.length===0)throw new Error('No bundled demo patients are available.');
  $('#patientSelect').innerHTML=patients.map(p=>`<option>${text(p.patient_id)}</option>`).join('');
  pid=patients[0].patient_id;
- await refreshRealSubjects();
- await refreshModelEvidence();
+ // Judge demo must work even if optional cohort enumeration or research reports fail.
  await reset();
+ const extras=await Promise.allSettled([refreshRealSubjects(),refreshModelEvidence()]);
+ if(extras[0].status==='rejected'){
+  $('#realStatus').textContent='Optional research-cohort lookup unavailable; synthetic demo remains available.';
+  $('#loadRealBtn').disabled=true;
+ }
+ if(extras[1].status==='rejected'){
+  $('#modelEvidence').textContent='Optional model evidence could not be loaded; see the repository evidence index.';
+  $('#realResearch').textContent='Independent research report unavailable from the running API.';
+ }
 }
 async function refreshRealSubjects(){
  const d=await api('/api/real/subjects');
@@ -39,8 +48,33 @@ async function refreshModelEvidence(){
  }
 
 }
-async function reset(){snap=await api(`/api/replay/${pid}/reset`,{method:'POST'});render()}
-async function step(n=1){snap=await api(`/api/replay/${pid}/step?steps=${n}`,{method:'POST'});render()}
+let mutationQueue=Promise.resolve(),stepQueued=false;
+function queueReplay(action){
+ const task=mutationQueue.then(action,action);
+ mutationQueue=task.then(()=>undefined,()=>undefined);
+ return task;
+}
+function displayReplayError(error){
+ running=false;clearInterval(timer);
+ $('#runBtn').textContent='Run replay';
+ $('#dataBanner').textContent='Replay problem: '+(error instanceof Error?error.message:String(error))+' · Try Reset.';
+}
+async function reset(){
+ running=false;clearInterval(timer);$('#runBtn').textContent='Run replay';
+ try{
+  const result=await queueReplay(()=>api(`/api/replay/${pid}/reset`,{method:'POST'}));
+  snap=result;render();
+ }catch(error){displayReplayError(error);throw error;}
+}
+async function step(n=1){
+ if(stepQueued)return;
+ stepQueued=true;
+ try{
+  const result=await queueReplay(()=>api(`/api/replay/${pid}/step?steps=${n}`,{method:'POST'}));
+  snap=result;render();
+ }catch(error){displayReplayError(error);}
+ finally{stepQueued=false;}
+}
 function render(){
  if(!snap)return;
  $('#versionBadge').textContent='v'+snap.twin_version.toLocaleString(); $('#syncBadge').textContent='● '+snap.sync_status; badgeTone($('#syncBadge'),snap.sync_status==='SYNCHRONIZED'?'good':'warn');
@@ -50,7 +84,7 @@ function render(){
  $('#heartRate').innerHTML=`${num(snap.reading.heart_rate)} <small>bpm</small>`; $('#wearableSub').innerHTML=`<span>Activity ${snap.reading.activity==null?'—':Math.round(Number(snap.reading.activity)*100)+'%'}</span><span>${text(snap.reading.steps_5m)} steps/5m</span>`;
  const a=snap.model_metrics.population_mae,b=snap.model_metrics.personalized_mae; const imp=(typeof a==='number'&&typeof b==='number'&&a>0)?((a-b)/a*100):null; $('#improvement').textContent=imp===null?'Learning':imp.toFixed(1)+'%'; $('#resolvedCount').textContent=snap.model_metrics.resolved_forecasts+' resolved';
  $('#chartConfidence').textContent='Sensor/data confidence: '+snap.confidence; drawChart();
- $('#forecastRows').innerHTML=snap.forecasts.length?snap.forecasts.map(f=>`<div><span>+${f.horizon_min} min</span><strong>${f.personalized} mg/dL</strong><small>population ${f.population} · interval ${f.lower}–${f.upper} · ${text(f.interval_method)}</small></div>`).join(''):'<p class="muted">Forecast withheld: '+text(snap.abstention_reason)+'</p>';
+ $('#forecastRows').innerHTML=snap.forecasts.length?(snap.reading.quality!=='VALID'?'<p class="muted">Latest CGM sample is not verified. Estimates use earlier data; the current glucose is not a measured observation.</p>':'')+snap.forecasts.map(f=>`<div><span>+${f.horizon_min} min</span><strong>${f.personalized} mg/dL</strong><small>population ${f.population} · interval ${f.lower}–${f.upper} · ${text(f.interval_method)}</small></div>`).join(''):'<p class="muted">Forecast withheld: '+text(snap.abstention_reason)+'</p>';
  $('#drivers').innerHTML=snap.explanations.map(e=>`<div><span>${text(e.factor)}</span><div class="bar"><i class="${e.direction==='down'?'down':''}" style="width:${Math.max(6,e.strength*100)}%"></i></div><b>${e.direction==='up'?'↑':'↓'}</b></div>`).join('');
  $('#currentFacts').innerHTML=`<div><span>Active carbs</span><b>${snap.reading.carbs_active_g==null?'—':num(snap.reading.carbs_active_g,1)+' g'}</b></div><div><span>Minutes since meal</span><b>${text(snap.reading.minutes_since_meal)}</b></div><div><span>Dataset</span><b>${text(source)}</b></div>`;
  $('#learning').innerHTML=`<div><span>Population MAE</span><strong>${typeof a==='number'?a+' mg/dL':'collecting'}</strong></div><div><span>Personalized MAE</span><strong>${typeof b==='number'?b+' mg/dL':'collecting'}</strong></div><div><span>Resolved forecasts</span><strong>${snap.model_metrics.resolved_forecasts}</strong></div>`;
@@ -125,8 +159,8 @@ $('#judgeDemoBtn').addEventListener('click',async()=>{
  finally{button.disabled=false;button.textContent='Show chapter';}
 });
 $('#patientSelect').addEventListener('change',async e=>{running=false;clearInterval(timer);$('#runBtn').textContent='Run replay';pid=e.target.value;await reset()});
-$('#runBtn').addEventListener('click',()=>{running=!running;$('#runBtn').textContent=running?'Pause replay':'Run replay';clearInterval(timer);if(running)timer=setInterval(()=>step(Number($('#speedSelect').value)).catch(()=>{running=false}),1000)});
-$('#stepBtn').addEventListener('click',()=>step(1)); $('#resetBtn').addEventListener('click',()=>reset());
+$('#runBtn').addEventListener('click',()=>{running=!running;$('#runBtn').textContent=running?'Pause replay':'Run replay';clearInterval(timer);if(running)timer=setInterval(()=>step(Number($('#speedSelect').value)),1000)});
+$('#stepBtn').addEventListener('click',()=>step(1)); $('#resetBtn').addEventListener('click',()=>reset().catch(()=>{}));
 $('#loadRealBtn').addEventListener('click',async()=>{const sel=$('#realSubject'), id=sel.value;if(!id)return;const kind=sel.selectedOptions[0]?.dataset.kind;running=false;clearInterval(timer);const path=kind==='CGMacros'?`/api/real/cgmacros/load/${id}`:`/api/real/shanghai/load/${id}`;snap=await api(path,{method:'POST'});pid=snap.patient.patient_id;let opt=[...$('#patientSelect').options].find(o=>o.value===pid);if(!opt){opt=document.createElement('option');opt.value=pid;opt.textContent=pid;$('#patientSelect').appendChild(opt)}$('#patientSelect').value=pid;render()});
 $$('.tab').forEach(b=>b.addEventListener('click',()=>{
  $$('.tab').forEach(x=>x.classList.remove('active'));
