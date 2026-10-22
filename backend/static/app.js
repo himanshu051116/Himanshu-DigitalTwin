@@ -59,14 +59,58 @@ function render(){
  $('#provenance').innerHTML=`<div><span>Current stream</span><b>${text(snap.reading.provenance?.stream)}</b></div><div><span>Glucose channel</span><b>${text(snap.reading.provenance?.glucose)}</b></div><div><span>Wearable channel</span><b>${text(snap.reading.provenance?.activity,'not available')}</b></div><div><span>Runtime model</span><b>${text(snap.model_info?.source||snap.model_info?.mode||'unknown')}</b></div><div><span>Validation</span><b>${text(snap.model_info?.validation,'demo only')}</b></div><div><span>Twin version</span><b>#${snap.twin_version}</b></div>`;
 }
 function drawChart(){
- const svg=$('#trajectory'), W=820,H=255,pad=34, pts=snap.recent_history.filter(x=>typeof x.glucose==='number'), fs=snap.forecasts;
- const vals=[...pts.map(x=>x.glucose),...fs.flatMap(f=>[f.personalized,f.lower,f.upper])]; const min=Math.min(90,...vals)-10,max=Math.max(180,...vals)+10;
- const y=v=>H-pad-(v-min)/(max-min)*(H-pad*2), x=(i,total)=>pad+i/Math.max(1,total-1)*(W-pad*2); const total=pts.length+fs.length;
- const hist=pts.map((p,i)=>(i?'L':'M')+`${x(i,total)},${y(p.glucose)}`).join(' '); const curX=pts.length?x(pts.length-1,total):pad,curY=y(pts.at(-1)?.glucose||fs[0]?.personalized||120);
- const predXs=fs.map((_,i)=>x(pts.length+i,total)); const pred=`M${curX},${curY} `+fs.map((f,i)=>`L${predXs[i]},${y(f.personalized)}`).join(' ');
- const upper=[{x:curX,y:curY},...fs.map((f,i)=>({x:predXs[i],y:y(f.upper)}))], lower=[...fs.map((f,i)=>({x:predXs[i],y:y(f.lower)})).reverse(),{x:curX,y:curY}]; const band=[...upper,...lower].map((p,i)=>(i?'L':'M')+`${p.x},${p.y}`).join(' ')+' Z';
- svg.innerHTML=[100,140,180,220].filter(v=>v>min&&v<max).map(v=>`<line x1="${pad}" x2="${W-pad}" y1="${y(v)}" y2="${y(v)}" class="grid"/><text x="4" y="${y(v)+4}" class="axis">${v}</text>`).join('')+`<path d="${band}" class="uncertainty"/><path d="${hist}" class="observed"/><path d="${pred}" class="predicted"/>`+fs.map((f,i)=>`<circle cx="${predXs[i]}" cy="${y(f.personalized)}" r="4.5" class="forecastDot"/><text x="${predXs[i]-16}" y="${H-8}" class="axis">+${f.horizon_min}m</text>`).join('')+`<text x="${pad}" y="16" class="legend">Observed</text><text x="${pad+80}" y="16" class="legend predictedText">Forecast + uncertainty</text>`;
+ const svg=$('#trajectory'), W=820,H=255,pad=35;
+ const history=Array.isArray(snap.recent_history)?snap.recent_history:[];
+ const forecasts=Array.isArray(snap.forecasts)?snap.forecasts:[];
+ const now=Date.parse(snap.timestamp);
+ const startTime=history.length?Date.parse(history[0].timestamp):now;
+ const t0=Number.isFinite(startTime)?Math.min(startTime,now):now-5*60*1000;
+ const endTime=now+120*60*1000;
+ const xTime=t=>pad+(Math.max(t0,Math.min(endTime,t))-t0)/Math.max(1,endTime-t0)*(W-2*pad);
+ const actual=history.filter(p=>p.quality==='VALID'&&typeof p.glucose==='number'&&Number.isFinite(p.glucose));
+ const values=[...actual.map(p=>p.glucose),...forecasts.flatMap(f=>[f.personalized,f.lower,f.upper].filter(Number.isFinite))];
+ const low=Math.min(90,...values)-10,high=Math.max(180,...values)+10;
+ const y=v=>H-pad-(v-low)/Math.max(1,high-low)*(H-2*pad);
+ // Do not connect across missing/outlier/imputed CGM. Engine history may carry
+ // numerical glucose forward internally; that is not an observed measurement.
+ let observedPath='',penUp=true;
+ for(const p of history){
+  const t=Date.parse(p.timestamp);
+  if(p.quality!=='VALID'||typeof p.glucose!=='number'||!Number.isFinite(t)){
+   penUp=true;continue;
+  }
+  observedPath+=(penUp?'M':'L')+xTime(t)+','+y(p.glucose)+' ';
+  penUp=false;
+ }
+ const hasMeasuredCurrent=snap.reading?.quality==='VALID'&&
+  typeof snap.reading?.glucose==='number'&&Number.isFinite(snap.reading.glucose);
+ const showForecast=hasMeasuredCurrent&&forecasts.length>0;
+ const forecastPoints=showForecast?forecasts.filter(f=>Number.isFinite(f.personalized)).map(f=>({
+  x:xTime(now+f.horizon_min*60000),y:y(f.personalized),upper:y(f.upper),lower:y(f.lower),h:f.horizon_min
+ })):[];
+ const first=showForecast?{x:xTime(now),y:y(snap.reading.glucose)}:null;
+ const forecastPath=first?'M'+first.x+','+first.y+' '+forecastPoints.map(p=>'L'+p.x+','+p.y).join(' '):'';
+ const region=first&&forecastPoints.length?
+  'M'+first.x+','+first.y+' '+forecastPoints.map(p=>'L'+p.x+','+p.upper).join(' ')+
+  ' '+[...forecastPoints].reverse().map(p=>'L'+p.x+','+p.lower).join(' ')+
+  ' L'+first.x+','+first.y+' Z':'';
+ const grid=[100,140,180,220].filter(v=>v>low&&v<high).map(v=>
+  '<line x1="'+pad+'" x2="'+(W-pad)+'" y1="'+y(v)+'" y2="'+y(v)+'" class="grid"/>'+
+  '<text x="3" y="'+(y(v)+4)+'" class="axis">'+v+'</text>').join('');
+ const nodes=forecastPoints.map(p=>'<circle cx="'+p.x+'" cy="'+p.y+'" r="4.5" class="forecastDot"/>'+
+  '<text x="'+(p.x-18)+'" y="'+(H-6)+'" class="axis">+'+p.h+'m</text>').join('');
+ const missing=history.some(p=>p.quality!=='VALID');
+ const legend='<text x="'+pad+'" y="16" class="legend">Measured CGM (valid only)</text>'+
+  (showForecast?'<text x="'+(pad+210)+'" y="16" class="legend predictedText">Illustrative forecast</text>':'')+
+  (missing?'<text x="'+(W-170)+'" y="16" class="legend">Gaps omitted</text>':'');
+ svg.innerHTML=grid+(region?'<path d="'+region+'" class="uncertainty"/>':'')+
+  '<path d="'+observedPath.trim()+'" class="observed"/>'+
+  (forecastPath?'<path d="'+forecastPath+'" class="predicted"/>':'')+nodes+legend;
+ svg.setAttribute('aria-label',showForecast?
+  'Valid CGM history with gaps omitted and illustrative 30, 60 and 120-minute projections on a true elapsed-time scale':
+  'Valid CGM history with missing readings omitted; forecast is withheld');
 }
+
 $('#judgeDemoBtn').addEventListener('click',async()=>{
  running=false;clearInterval(timer);$('#runBtn').textContent='Run replay';
  const button=$('#judgeDemoBtn'),chapter=$('#judgeChapter').value;
