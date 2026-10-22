@@ -8,7 +8,7 @@ from pptx.enum.dml import MSO_THEME_COLOR
 from pptx.enum.text import MSO_AUTO_SIZE
 from pptx.enum.shapes import MSO_AUTO_SHAPE_TYPE
 
-OUT=str(Path(__file__).resolve().parent / 'HimanshuDigitalTwin_Presentation.pptx')
+OUT=str(Path(__file__).resolve().parent/'HimanshuDigitalTwin_Presentation.pptx')
 P=Presentation();P.slide_width=Inches(13.333);P.slide_height=Inches(7.5)
 B=P.slide_layouts[6]
 NAVY='152C3C'; INK='172F3B'; TEAL='167E78'; MINT='A5DCCB'; PALE='F5F8F7'; WHITE='FFFFFF'; MUTED='667D88'; GREY='D9E4E6'; ORANGE='B46F4B'; LIGHT='E6F1EF'; HBLUE='254C5A'
@@ -99,18 +99,34 @@ line(s,9.4,6.46,2.39,6.46,'A6BCC2',1);line(s,2.39,6.46,2.39,5.08,'A6BCC2',1)
 tx(s,'Later valid observations are compared with earlier forecasts (synthetic verification)',2.74,6.20,6.42,.22,11,MUTED)
 tx(s,'Python · FastAPI · HTML/CSS/JS  /  scikit-learn research pipeline is separate',.66,6.73,11.2,.24,11,MUTED)
 
-# 04 — code-backed guided user flow
-s=base(4,'03 / Demonstration','Six checkpoints. One reproducible synthetic patient.','The default FastAPI dashboard lets judges jump directly to each state.')
-chapters=[('01','BASELINE','Profile + first valid CGM'),('02','BREAKFAST','Meal context changes'),('03','LUNCH','Forecast trajectory'),('04','VERIFICATION','Earlier forecasts resolved'),('05','SENSOR GAP','Abstention, no risk'),('06','RECOVERY','Fresh signal returns')]
-for i,(n,a,b) in enumerate(chapters):
- x=.66+(i%3)*4.18;y=2.45+(i//3)*1.59
- card(s,x,y,3.92,1.38,WHITE,GREY);rect(s,x,y,.055,1.38,ORANGE if i==4 else TEAL)
- tx(s,n,x+.22,y+.17,.55,.40,23,ORANGE if i==4 else TEAL,True)
- tx(s,a,x+.83,y+.15,2.84,.37,16,INK,True)
- tx(s,b,x+.84,y+.62,2.88,.35,13,MUTED)
-card(s,.66,5.87,12.27,.81,NAVY)
-tx(s,'JUDGE ACTION',.91,6.05,1.5,.25,11,MINT,True)
-tx(s,'Run FastAPI → open localhost:8000 → Guided judge demo → choose chapter',2.43,5.99,10.1,.40,17,WHITE)
+# 04 — genuine local dashboard screenshot with editable judge notes
+s=base(4,'03 / Working prototype','The running demo — not just an architecture diagram.','Actual FastAPI dashboard, reproducible synthetic lunch checkpoint.')
+shot=Path(__file__).resolve().parent/'Live_Demo_Lunch.png'
+if shot.is_file():
+  # Only embed a real image captured from a running localhost application.
+  # Every annotation, heading and chapter list remains an editable PowerPoint object.
+  card(s,.62,2.43,8.54,4.22,WHITE,GREY)
+  pic=s.shapes.add_picture(str(shot), Inches(.74), Inches(2.55), width=Inches(8.29), height=Inches(3.75))
+  tx(s,'ACTUAL LOCAL DEMO   /   LUNCH CHECKPOINT',.85,6.34,7.98,.22,10,TEAL,True)
+  card(s,9.36,2.43,3.32,4.22,'E5F0EE')
+  tx(s,'JUDGE PATH',9.63,2.69,2.75,.26,12,TEAL,True)
+  for i,(name,detail) in enumerate([
+     ('01 · Baseline','Initial reading'),('02 · Breakfast','Meal context'),
+     ('03 · Lunch','Forecast trajectory'),('04 · Verification','Forecasts resolved'),
+     ('05 · Sensor gap','Forecast withheld'),('06 · Recovery','Fresh signal returns')]):
+      y=3.10+i*.49
+      tx(s,name,9.63,y,2.8,.23,14,INK,True)
+      tx(s,detail,9.63,y+.22,2.8,.2,10,MUTED)
+  tx(s,'Six deterministic synthetic states. No clinical predictions.',9.61,6.17,2.78,.28,10,ORANGE)
+else:
+  # Intentionally transparent when no real capture has been obtained.
+  card(s,.66,2.45,8.54,4.20,WHITE,GREY)
+  tx(s,'Screenshot not yet captured',1.15,3.44,7.6,.65,28,INK,True)
+  tx(s,'Run submission/capture_demo.py against the localhost app.\nNever substitute a fabricated dashboard image.',1.15,4.30,7.65,.87,18,MUTED)
+  card(s,9.37,2.45,3.33,4.20,LIGHT)
+  for i,label in enumerate(['BASELINE','BREAKFAST','LUNCH','VERIFICATION','SENSOR GAP','RECOVERY']):
+    tx(s,f'{i+1:02d}  {label}',9.68,2.88+i*.50,2.75,.31,14,TEAL if i!=4 else ORANGE,True)
+  tx(s,'Real application image required for final evidence.',.85,6.36,7.85,.28,12,ORANGE)
 
 # 05 — distinguish transitions with 15-min rule
 s=base(5,'04 / Sensor integrity','When the signal fails, the interface must say so.','The demo includes a deliberately missing/stale glucose segment.')
