@@ -1,13 +1,11 @@
 """Per-browser replay isolation: cookies are ephemeral demo state, not authentication."""
 from concurrent.futures import ThreadPoolExecutor
-from threading import Barrier
-from time import monotonic
 
 import pytest
 from fastapi.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
 
-from app.main import app, BROWSER_SESSIONS, DEMO, MODEL, MODEL_LABEL
+from app.main import app, DEMO, MODEL, MODEL_LABEL
 from app.browser_sessions import (
     BrowserSessionStore, COOKIE_NAME, SessionCapacityError,
 )
