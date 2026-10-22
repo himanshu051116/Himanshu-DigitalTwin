@@ -5,10 +5,12 @@
 **Project:** HimanshuDigitalTwin — patient-specific glucose forecasting and sensor-quality-aware monitoring  
 **Presenter documented in source:** Himanshu Shukla
 
-This directory follows the organizer's **Team Name_College Name** naming convention as a navigation entry point. The runnable source and signed-off submission assets remain in the repository root and linked below, without duplicating files. **The organizer's acceptance of this layout has not been verified.**
+This directory follows the organizer's **Team Name_College Name** naming convention as a navigation entry point. The runnable source and published submission assets remain in the repository root and linked below, without duplicating files. **The organizer's acceptance of this layout has not been verified.**
 
 | Evidence | Location |
 |---|---|
+| **Judge review in two minutes** | [Judge quick start](../JUDGE_START_HERE.md) · [submission file index](../submission/README.md) |
+| **Actual running interface** | [Synthetic lunch screenshot](../submission/Live_Demo_Lunch.png) · [sensor-gap screenshot](../submission/Live_Demo_SensorGap.png) |
 | Project overview, problem, use case, models and constraints | [Root README](../README.md) |
 | Run the working synthetic demonstrator | [Judge quick start](../JUDGE_START_HERE.md) |
 | Architecture diagram | [Architecture PDF](../submission/architecture.pdf) |
