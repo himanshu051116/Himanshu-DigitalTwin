@@ -2,7 +2,7 @@
 
 **Team:** himanshusubh1510 · **Presenter:** Himanshu Shukla · **Institution:** MITS Gwalior
 
-This is a text-only reading companion to the six-slide deck. It is not a substitute for the PowerPoint/PDF artwork, which has not yet been uploaded to this repository.
+This text companion summarizes the six-slide deck. The [PowerPoint](HimanshuDigitalTwin_Presentation.pptx), [PDF](HimanshuDigitalTwin_Presentation.pdf), [preview](Preview_All_Six_Slides.png), and [browser slides](Presentation.html) are available in this repository.
 
 ## 1. HimanshuDigitalTwin
 A patient-specific view of what glucose may do next. Historical patient context and incoming observations support 30-, 60- and 120-minute forecast scenarios. The synthetic demonstrator withholds predictions when glucose data is unreliable.
