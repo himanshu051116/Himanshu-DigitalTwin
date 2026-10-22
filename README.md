@@ -1,174 +1,114 @@
 # HimanshuDigitalTwin
 
-![HimanshuDigitalTwin — patient-specific glucose research prototype](docs/assets/hero.svg)
+**A glucose digital-twin research prototype that knows when not to predict.**  
+Happiest Health Digital Twin Challenge 2026 · **Team:** `himanshusubh1510` · **Presenter:** Himanshu Shukla · **College:** MITS Gwalior
 
-[**Judge quick start**](JUDGE_START_HERE.md) · [**Architecture**](docs/ARCHITECTURE_AND_MODELS.md) · [**Presentation PDF**](submission/HimanshuDigitalTwin_Presentation.pdf) · [**Research evidence**](submission/JUDGE_EVIDENCE_INDEX.md) · [**Submission status**](SUBMISSION_CHECKLIST.md)
+**What is working:** A deterministic, browser-based **synthetic** patient replay that combines patient history, glucose readings, meals and wearable activity; updates patient state; generates illustrative 30/60/120-minute forecasts; checks earlier predictions against later observations; and **withholds predictions when the sensor data is too stale**.
 
-**Team:** himanshusubh1510  
-**Presenter:** Himanshu Shukla  
-**College:** Madhav Institute of Technology and Science (MITS), Gwalior  
-**Competition:** Happiest Health Digital Twin Challenge 2026  
-**Project:** Patient-specific glucose forecasting and sensor-quality-aware monitoring
+**What it is not:** A clinically validated glucose predictor, medical device, insulin-dosing tool or public patient-record service. The independently reported research results below are **not** the performance of the running demo.
 
-> **Research demonstration, not a clinical device.** The interactive walkthrough uses simulated patient observations and illustrative, uncalibrated forecasts. It must not be used for diagnosis, treatment or insulin dosing.
+[**Judge's 2-minute guide**](JUDGE_START_HERE.md) · [**Six-slide PDF**](submission/HimanshuDigitalTwin_Presentation.pdf) · [**Editable PPTX**](submission/HimanshuDigitalTwin_Presentation.pptx) · [**Evidence & limits**](submission/JUDGE_EVIDENCE_INDEX.md) · [**Submission status**](SUBMISSION_CHECKLIST.md)
 
-| What you can inspect | Current evidence |
-|---|---|
-| **Working browser demonstration** | Six deterministic simulated replay chapters, including sensor-gap abstention and recovery |
-| **Forecast scope** | 30-, 60-, 120-minute research scenarios and an illustrative two-hour excursion warning target |
-| **Research benchmark** | A separate patient-grouped CGMacros experiment; **not** the active demo forecaster |
-| **Submission state** | GitHub source and diagrams available; unlisted video, registered roster and Unstop acceptance are **not confirmed** |
+## The working prototype
 
-## The problem
+[<img src="submission/Live_Demo_Lunch.png" width="49%" alt="Genuine local screenshot: synthetic lunch checkpoint showing valid glucose and forecasts">](submission/Live_Demo_Lunch.png) [<img src="submission/Live_Demo_SensorGap.png" width="49%" alt="Genuine local screenshot: synthetic sensor-gap checkpoint withholding forecasts and risk">](submission/Live_Demo_SensorGap.png)
 
-A glucose reading describes the **present**, but not what will happen after a meal or physical activity. Patient phenotype, historical glucose patterns, incoming continuous glucose monitoring (CGM) readings, meal context and activity can all affect near-term behavior. Missing or stale sensor values make a plausible-looking prediction particularly misleading.
+*Actual Chromium captures of the FastAPI demo: valid reading (left) and stale-sensor abstention (right).* [Capture source](submission/capture_demo.py). No real patient is depicted.
 
-**Target healthcare use case:** Type-2 diabetes research support. The prototype explores glucose trajectories over **30, 60 and 120 minutes** and a research warning target: onset of a *new* glucose excursion above 180 mg/dL within the next two hours. The warning is **not** an approved or clinically calibrated alert.
+### Run in less than five minutes
 
-## What the prototype does
+**Prerequisite:** Python 3.11+; no patient datasets, credentials or API keys required.
 
-The demonstrator combines baseline patient context with time-stamped sensor-style observations, updates a patient-specific digital state, displays a forecast and contextual contributors, and records outcomes for later comparison. It **withholds the forecast and risk** during the demonstrated stale-sensor condition. Within a short sensor gap (up to the 15-minute freshness rule), estimates may still be generated using the last valid reading; these are **extrapolations**, not fresh CGM observations. The public chart hides imputed values and visibly distinguishes the sensor state. The guided replay is deterministic and uses **synthetic data**, so judges can run it without downloading medical records.
-
-## System architecture
-
-![System architecture showing inputs, signal-quality gating, model separation, forecasts and abstention](docs/assets/system-architecture.svg)
-
-The default application runs a synthetic replay through `ReplaySession`, now isolated into independent ephemeral states per anonymous browser. Timestamped phenotype, CGM-style readings, meals and activity are converted into a versioned state. A sensor-quality check may deliberately suppress forecasts and risk output. Independent research training artifacts are kept separate from the live heuristic demonstration.
-
-[**Implementation map, model boundaries and key API routes →**](docs/ARCHITECTURE_AND_MODELS.md) · [**Critical readiness audit →**](docs/TECHNICAL_AUDIT.md)
-
-### Start the working prototype
-
-Requires Python 3.11 or newer.
+From the **repository root**:
 
 ```bash
-cd backend
-python -m pip install -r requirements.txt
-python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+python -m pip install -r backend/requirements.txt
+python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
 ```
 
-Open **http://127.0.0.1:8000** and select the **Guided judge demo**. Explore a valid forecast, sensor-data loss, forecast abstention and recovery.
+Open **http://127.0.0.1:8000** → select **Guided judge demo** → choose **Lunch** and click **Show chapter** → choose **Sensor gap** and click **Show chapter**.
 
-## Technical stack
+Or, after dependency installation, use `run_local.bat` (Windows) / `bash run_local.sh` (Linux/macOS). The **default** UI is served by FastAPI; the `frontend/` Next.js application is optional and not needed for the walkthrough.
 
-![Technology stack: FastAPI backend and vanilla JS demo, separate scikit-learn research and Next.js source](docs/assets/technology-stack.svg)
-
-**Default demo:** `backend/app/` and `backend/static/` run together under FastAPI. **Alternate frontend:** `frontend/` contains a separate Next.js/React interface and is not required for the judge walkthrough. The research pipeline is **not** automatically deployed or promoted into either interface.
-
-| Layer | Technology and purpose |
+| Judge checkpoint | What the running demo should show |
 |---|---|
-| API and backend | Python, FastAPI, Pydantic, Uvicorn |
-| Demonstrator UI | HTML, CSS and JavaScript served by FastAPI |
-| Additional frontend source | Next.js, React and TypeScript (not required to run the guided demo) |
-| Data processing | pandas, NumPy; CGMacros and ShanghaiT2DM research adapters |
-| Machine-learning pipeline | scikit-learn, joblib; training-only feature imputation and subject-grouped evaluation |
-| Validation | pytest, API checks, sensor-quality and promotion-gate regression tests |
+| **Lunch** | Synthetic 12:15 PM glucose **144 mg/dL**; illustrative +30/+60/+120-minute forecasts **155.5 / 156.0 / 145.4 mg/dL** |
+| **Verification** | Earlier forecasts compared with later *simulated* observations; demo residual adaptation is not an approved clinical personalization method |
+| **Sensor gap** | `quality=IMPUTED`, `glucose=null`, `forecast_status=ABSTAINED`, `forecasts=[]`, `excursion_risk=null` |
+| **Recovery** | Verified synthetic readings return; forecasting resumes |
+| **Two browsers** | Separate anonymous browser profiles cannot change each other's replay state; two tabs in the same profile share a session |
 
-### AI / ML models and framework
+The other guided chapters are **Baseline** and **Breakfast**. A brief sensor gap may permit a **provisional** estimate based on the last valid observation for up to 15 minutes; the selected **Sensor gap** chapter shows *stale-sensor abstention*. Carried-forward internal values are not presented as new measured CGM readings.
 
-The **canonical research training implementation** uses `HistGradientBoostingRegressor` for 30/60/120-minute glucose estimates and `LogisticRegression` for the binary onset-event research task. It uses **patient-grouped training/validation folds** and an untouched subject-level holdout, with separate evidence gates for trained-model activation, personalization and uncertainty intervals. The research transport pipeline restricts its features to modalities available in the external cohort.
+### Verify without trusting the screenshots
 
-**Do not confuse these training implementations with the active demo model:** the submitted walkthrough currently runs a clearly labelled **heuristic/simulated forecaster**, not an approved trained research artifact. The canonical trainer has not yet reproduced the results of the separate independent CGMacros benchmark.
-
-### Independent research evidence
-
-![Comparison of independent CGMacros model and persistence MAE, with 30-, 60-, 120-minute results and research caveat](docs/assets/research-evidence.svg)
-
-A separate experiment involving **45 CGMacros participants** (14 with Type-2 diabetes) reported the following **primary subject-holdout** results. Units are MAE in mg/dL; smaller is better.
-
-| Horizon | Persistence baseline | Study ML model | Relative MAE reduction |
-|---|---:|---:|---:|
-| 30 min | 14.82 | 13.09 | 11.65% |
-| 60 min | 22.94 | 20.77 | 9.47% |
-| 120 min | 32.46 | 27.67 | 14.76% |
-
-Only **three Type-2 diabetes participants** were in the primary ten-person holdout; these are **pooled-cohort findings**, not T2D-only or clinical-validation statistics. Personalization and uncertainty intervals did not meet their own acceptance criteria. Shanghai external validation remains incomplete. See [research evidence](backend/reports/research/) and [judge evidence index](submission/JUDGE_EVIDENCE_INDEX.md).
-
-## Repository map
-
-| Path | What it contains |
-|---|---|
-| [`backend/app/`](backend/app/) | FastAPI routes, synthetic patient stream, replay engine, sensor and model safeguards |
-| [`backend/static/`](backend/static/) | Default dashboard, browser interaction and trajectory charts |
-| [`backend/scripts/`](backend/scripts/) | Evidence verification, model training tooling and readiness checks |
-| [`backend/tests/`](backend/tests/) | Automated replay, input-quality and artifact-gate regression coverage |
-| [`frontend/`](frontend/) | Optional Next.js / React / TypeScript interface, **not** the default judge demo |
-| [`backend/reports/research/`](backend/reports/research/) | Independent study reports; not original independent training scripts or participant datasets |
-| [`docs/assets/`](docs/assets/) | Original, vector README graphics (editable SVG) |
-| [`docs/TECHNICAL_AUDIT.md`](docs/TECHNICAL_AUDIT.md) | Confirmed limitations, corrective work, and still-unverified checks |
-| [`submission/`](submission/) | Architecture PDF, six-slide deck, demonstration plan, evidence index and metadata |
-
-## Judge verification in one session
-
-Start the demo using the commands above. Select the six **Guided judge demo** chapters and verify that the sensor-gap chapter has an absent glucose value, no forecast, and no excursion risk. The separate study metrics are available for inspection under **Evidence & safety**, but cannot be claimed as live-model accuracy.
-
-From the repository **root**, run:
+From the repository root, after installing the Python dependencies:
 
 ```bash
 python backend/scripts/verify_judge_submission.py
 python -m pytest backend/tests -q
-python backend/scripts/submission_readiness.py
 ```
 
-The readiness checker is expected to report **NOT_READY** until the real video and registration/submission attestations exist. Its failure exit code is intentional in that state; it does not mean the replay itself failed. Tests validate software behavior, **not** clinical efficacy.
+View the [continuous verification workflow](https://github.com/himanshu051116/Himanshu-DigitalTwin/actions/workflows/verify-submission.yml) and [reproducible judge trace](submission/judge_verified_demo_trace.json). Successful tests verify application consistency and documented safety behavior, **not clinical efficacy**.
 
-## Actual running interface — synthetic capture
+## The problem
 
-![Actual locally rendered HimanshuDigitalTwin FastAPI dashboard at the synthetic lunch checkpoint](submission/Live_Demo_Lunch.png)
+A current glucose reading is not a prediction of the next two hours. Meals, activity, patient phenotype and changes in measurement quality can alter the meaning of the same starting value. A convincing-looking forecast from an unreliable sensor is a safety problem. This prototype studies how to combine context with *explicit abstention* rather than producing a number unconditionally.
 
-This is a **Playwright screenshot of the running FastAPI dashboard**, automatically captured by [the browser capture script](submission/capture_demo.py) after selecting the bundled *Lunch* judge chapter. The figures are simulated and the risk display is uncalibrated. [See the actual sensor-gap state](submission/Live_Demo_SensorGap.png), where glucose is unavailable and predictions are withheld.
+## Healthcare use case
 
-The [editable PowerPoint](submission/HimanshuDigitalTwin_Presentation.pptx) includes a cropped portion of the verified lunch screenshot on slide 4; all surrounding labels, flow cards and other slides remain editable.
+**Research-oriented support for near-term Type-2 diabetes glucose monitoring:** 30-, 60-, and 120-minute glucose trajectory estimates, a simulated warning target for *new* excursions above 180 mg/dL within the next two hours, and a patient-state audit trail. The default demonstration is synthetic and its forecasts, risk estimates and uncertainty intervals are **illustrative and uncalibrated**. It does not recommend treatment.
 
-## Judge presentation — editable PowerPoint
+## Architecture and technical stack
 
-The deck has been rebuilt as **six native editable slides** using Python PowerPoint objects. The introduction now illustrates the synthetic glucose scenario; the architecture shows an actual input–state–quality–output flow; the safety slide makes withheld forecasts prominent; and independent CGMacros statistics remain explicitly separate from the live demo. [Review its slide-by-slide design and source](submission/PRESENTATION_OVERVIEW.md).
+The working path is **patient context + time-stamped CGM/meal/activity observations → replay state → data-quality gate → illustrative forecast or withheld output → later synthetic verification**. A browser session holds its own ephemeral replay; it is not a persistent clinical user account.
 
-The previous [`Presentation.html`](submission/Presentation.html) is an earlier browser-slide draft and is **not** the canonical submission presentation. New slides have no invented clinical dashboard screenshots. A live screenshot/video still requires genuine capture.
-
-## Submission files
-
-| Required item | Public repository link |
+| Layer | Code and technology |
 |---|---|
-| Judge quick start | [JUDGE_START_HERE.md](JUDGE_START_HERE.md) |
-| Architecture diagram | [PDF](submission/architecture.pdf) · [editable SVG](docs/assets/system-architecture.svg) · [source-component guide](docs/ARCHITECTURE_AND_MODELS.md) |
-| Six-slide presentation | [Editable PPTX](submission/HimanshuDigitalTwin_Presentation.pptx) · [PDF](submission/HimanshuDigitalTwin_Presentation.pdf) · [six-slide preview](submission/Preview_All_Six_Slides.png) · [native slide generator](submission/generate_native_deck.py) |
-| Project and outcome explanation | [Presentation overview](submission/PRESENTATION_OVERVIEW.md) |
-| Demonstration guidance | [minimum-20-minute recording plan](submission/VIDEO_RECORDING_PLAN.md) |
-| Open-source licence | [MIT Licence](LICENSE) |
-| Submission acceptance checklist | [SUBMISSION_CHECKLIST.md](SUBMISSION_CHECKLIST.md) |
+| Working API | [FastAPI / Python / Pydantic](backend/app/) and Uvicorn |
+| Default interactive dashboard | [HTML / CSS / JavaScript](backend/static/) served by FastAPI |
+| Patient-state engine | [ReplaySession](backend/app/engine.py), sensor-quality checks, forecast audit and synthetic feedback |
+| Research data preparation | pandas and NumPy; [CGMacros and ShanghaiT2DM adapters](backend/app/real_replay.py) |
+| Research model pipeline | scikit-learn and joblib; patient-grouped evaluation and model-promotion gates |
+| Optional UI | [Next.js / React / TypeScript](frontend/), separate from the default judge demo |
+| Verification | [pytest](backend/tests/), [GitHub Actions](.github/workflows/verify-submission.yml), [Playwright screenshot capture](submission/capture_demo.py) |
 
-## Demonstration video — pending
+[Architecture PDF](submission/architecture.pdf) · [Implementation and model boundaries](docs/ARCHITECTURE_AND_MODELS.md) · [Technical audit](docs/TECHNICAL_AUDIT.md)
 
-**Demonstration video (minimum 20 minutes): NOT YET PROVIDED.**
+### AI / ML models and framework
 
-The video URL has **not** been supplied or verified. The official public guidelines specify **a minimum duration of 20 minutes**, rather than a 15–20-minute limit. Once the video is genuinely uploaded, add its direct `https://www.youtube.com/watch?v=...` or `https://youtu.be/...` link **here** and in `submission/submission_metadata.json`. Confirm that it is accessible without logging into the uploader's account. Do not treat the recording plan as a substitute for the video.
+The **research training code** uses `HistGradientBoostingRegressor` for 30/60/120-minute glucose estimates and `LogisticRegression` for the separate onset-event task. It has patient-grouped train/validation logic and independent conditions for activating a trained forecaster, enabling personalization and accepting uncertainty intervals. The **running demonstration uses a heuristic forecaster**; the research training results are not silently promoted into it.
 
-### Organizer packaging requirement
+## Research evidence — separate from the demo
 
-The challenge instructions specify the folder naming pattern `Team Name_College Name`. The current repository remains named `Himanshu-DigitalTwin`; [the team-and-college submission index](himanshusubh1510_MITS_Gwalior/README.md) groups links using that naming pattern. This index does **not** establish acceptance of the packaging format by the organizer. If the participant dashboard requires the repository itself to be renamed or a specific directory layout, follow those instructions before submission.
+The [independent CGMacros report](backend/reports/research/CGMacros_Real_45_Subject_Evidence_Report_2026-10-12.md) describes 45 participants (14 with Type-2 diabetes), with a **10-person primary holdout containing only 3 T2D participants**. Lower MAE is better, in mg/dL:
 
-## Team, institution and licence
+| Forecast horizon | Persistence baseline | Separately evaluated study model |
+|---|---:|---:|
+| 30 minutes | 14.82 | 13.09 |
+| 60 minutes | 22.94 | 20.77 |
+| 120 minutes | 32.46 | 27.67 |
 
-- **Team name:** himanshusubh1510
-- **Presenter:** Himanshu Shukla
-- **Institution:** Madhav Institute of Technology and Science (MITS), Gwalior
-- **Registered leader and complete team roster:** require confirmation against the Unstop registration; not inferred here
-- **Incubator:** not confirmed; no incubation claim is made
-- **Licence:** [MIT](LICENSE). The third-party research datasets are governed by their own source terms and are not redistributed with the repository.
+**Interpretation:** These are pooled-cohort findings from a separate experiment, **not** validated T2D-only results and **not** accuracy of the active synthetic model. The canonical repository pipeline has not reproduced that study; personalization and interval-quality gates remain unapproved, and external Shanghai validation is incomplete. See [evidence and caveats](submission/JUDGE_EVIDENCE_INDEX.md).
 
-## Deployment constraint
+## Submission package
 
-**This is still a local research demonstration, not a production multi-tenant or clinical service.** Browser visits now get separate, anonymous, short-lived replay states with a server-issued HTTP-only cookie. The in-memory store expires idle sessions after 30 minutes and allows at most 32 per process. Session state remains ephemeral, and a multi-worker deployment would split state across processes. No identity, user authentication, durable audit storage or clinical-data controls have been implemented. **Do not deploy it publicly for patient use.** See the [technical audit](docs/TECHNICAL_AUDIT.md).
+| Open directly | What it contains |
+|---|---|
+| [Judge quick start](JUDGE_START_HERE.md) | Run commands, six test checkpoints, exact expected values |
+| [Editable PowerPoint](submission/HimanshuDigitalTwin_Presentation.pptx) · [PDF](submission/HimanshuDigitalTwin_Presentation.pdf) | Six-slide submission deck, including actual local dashboard screenshot |
+| [Presentation preview](submission/Preview_All_Six_Slides.png) | All six slides on one contact sheet |
+| [Architecture PDF](submission/architecture.pdf) · [architecture source](docs/assets/system-architecture.svg) | Workflow and architecture |
+| [Research evidence index](submission/JUDGE_EVIDENCE_INDEX.md) | Claim-to-source mapping and limitations |
+| [Submission checklist](SUBMISSION_CHECKLIST.md) | Requirement-by-requirement status |
+| [MIT license](LICENSE) · [team folder](himanshusubh1510_MITS_Gwalior/README.md) | Open-source terms and team/college navigation |
 
-## Evidence and safety boundaries
+Additional visual references: [project cover](docs/assets/hero.svg) · [technology stack](docs/assets/technology-stack.svg) · [independent research comparison](docs/assets/research-evidence.svg).
 
-- All values in the default interactive replay are **synthetic**; its heuristic forecasts and displayed risk estimates are **uncalibrated**.
-- The independent CGMacros result is from a **separate experiment**, not a trained model promoted into the running demo. Original study training scripts and participant-level data are not provided here.
-- The primary study holdout contains only **3 participants with Type-2 diabetes**. Do not treat pooled-cohort accuracy as diabetes-specific or clinical validation.
-- Personalization and nominal uncertainty intervals **did not pass** their acceptance gates. Shanghai external validation is **incomplete**.
-- No real medical records, identifiable sensor exports, personal credentials, or private dataset contents should be committed to GitHub.
+### Demonstration recording — not yet provided
 
-See the [judge evidence index](submission/JUDGE_EVIDENCE_INDEX.md) for what is reproducible and what remains unverified.
+A genuine **minimum-20-minute** unlisted YouTube demonstration URL has **not** been submitted to this repository. The [recording plan](submission/VIDEO_RECORDING_PLAN.md) is guidance, **not a video**. The officially registered team roster, relevant organizer format and Unstop submission acknowledgement also need confirmation; [full checklist](SUBMISSION_CHECKLIST.md).
 
-**Submission status:** Public project files exist on GitHub. An actual unlisted video link, any missing registered-team details, and confirmation of the competition-platform submission are still pending. See [SUBMISSION_CHECKLIST.md](SUBMISSION_CHECKLIST.md).
+**Deployment boundary:** The synthetic replay uses anonymous, expiring, in-process browser sessions. It has no production authentication, durable audit storage, multi-worker state sharing or clinical privacy controls. Do not use it with real patient records or for clinical decisions.
+
+**Team:** `himanshusubh1510` · **Presenter:** Himanshu Shukla · **Institution:** Madhav Institute of Technology and Science, Gwalior · **License:** [MIT](LICENSE). Research datasets have separate source terms and are not redistributed.
