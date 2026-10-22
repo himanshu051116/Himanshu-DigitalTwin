@@ -101,6 +101,15 @@ BROWSER_SESSIONS = BrowserSessionStore(DEMO, MODEL, MODEL_LABEL)
 
 @app.middleware("http")
 async def browser_demo_session(request: Request, call_next):
+    # Only stateful routes allocate memory; static assets/health/evidence do not.
+    path = request.url.path
+    stateful = (
+        path == "/" or path == "/api/patients" or
+        path.startswith("/api/replay/") or path.startswith("/api/demo/") or
+        path == "/api/scenario" or path.startswith("/api/real/")
+    )
+    if not stateful:
+        return await call_next(request)
     # For the local judge demo, a browser owns its own ephemeral replay state.
     # This cookie is not proof of identity and must never protect patient records.
     try:
