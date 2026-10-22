@@ -11,6 +11,7 @@ PAGES = [
     "JUDGE_START_HERE.md",
     "submission/JUDGE_EVIDENCE_INDEX.md",
     "submission/PRESENTATION_OVERVIEW.md",
+    "submission/README.md",
     "himanshusubh1510_MITS_Gwalior/README.md",
     "SUBMISSION_CHECKLIST.md",
 ]
