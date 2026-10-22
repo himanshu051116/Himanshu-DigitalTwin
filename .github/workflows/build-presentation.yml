@@ -34,6 +34,9 @@ jobs:
           HTML(filename=str(source), base_url=str(source.parent.resolve())).write_pdf(str(target))
           pages = len(PdfReader(str(target)).pages)
           print(f"Generated PDF: {target}, pages={pages}")
+          for i, page in enumerate(PdfReader(str(target)).pages, 1):
+              sample = " ".join((page.extract_text() or "").split())[:120]
+              print(f"PAGE {i} TEXT: {sample}")
           if pages != 6:
               raise SystemExit("Expected exactly six slide pages")
           PY
