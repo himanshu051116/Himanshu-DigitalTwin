@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 740" width="1280" height="740" role="img" aria-labelledby="title desc">
+<title id="title">HimanshuDigitalTwin system architecture and model governance</title>
+<desc id="desc">Patient context and sensor-style observations flow to time alignment, data quality gating, and simulated forecasts, or withheld output when readings are stale. Independent cohort research remains separate from the demonstration.</desc>
+<defs><marker id="a" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M1 1L7 4L1 7" stroke="#52879a" stroke-width="1.6" fill="none"/></marker><marker id="warn" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M1 1L7 4L1 7" stroke="#bd765a" stroke-width="1.6" fill="none"/></marker></defs>
+<rect width="1280" height="740" fill="#f5f8f8"/><path d="M0 0H1280V8H0" stroke="#2c7d7e" stroke-width="8"/>
+<g font-family="Inter,Arial,sans-serif">
+<text x="48" y="60" font-size="31" font-weight="760" letter-spacing="-1" fill="#152d40">System architecture</text>
+<text x="49" y="91" font-size="16" fill="#607988">Executable demo path and research path are intentionally separate.</text>
+<g font-size="13" font-weight="800" letter-spacing="1.6" fill="#497281"><text x="51" y="144">INPUTS</text><text x="400" y="144">SYNCHRONIZE</text><text x="694" y="144">QUALITY GATE</text><text x="982" y="144">OUTCOME</text></g>
+<rect x="50" y="166" width="282" height="75" rx="13" fill="#fff" stroke="#b7ced6"/><text x="67" y="196" font-size="17" font-weight="700" fill="#152d40">Patient context</text><text x="67" y="221" font-size="13" fill="#536c7d">Phenotype, HbA1c, baseline history</text>
+<rect x="50" y="260" width="282" height="75" rx="13" fill="#fff" stroke="#b7ced6"/><text x="67" y="290" font-size="17" font-weight="700" fill="#152d40">CGM-style observations</text><text x="67" y="315" font-size="13" fill="#536c7d">Timestamped glucose and freshness</text>
+<rect x="50" y="354" width="282" height="75" rx="13" fill="#fff" stroke="#b7ced6"/><text x="67" y="384" font-size="17" font-weight="700" fill="#152d40">Meal and wearable context</text><text x="67" y="409" font-size="13" fill="#536c7d">Carbs, activity, heart rate</text>
+<rect x="397" y="247" width="226" height="101" rx="13" fill="#eef7f6" stroke="#a6cad0"/><text x="414" y="277" font-size="17" font-weight="700" fill="#152d40">ReplaySession</text><text x="414" y="302" font-size="13" fill="#536c7d">Time alignment + versioned state</text>
+<rect x="691" y="247" width="218" height="101" rx="13" fill="#f3fbf8" stroke="#99c5c4"/><text x="708" y="277" font-size="17" font-weight="700" fill="#152d40">Signal check</text><text x="708" y="302" font-size="13" fill="#536c7d">Valid, stale, missing, outlier</text>
+<rect x="981" y="174" width="249" height="109" rx="13" fill="#ecf6f1" stroke="#87bba9"/><text x="998" y="204" font-size="17" font-weight="700" fill="#152d40">Forecast available</text><text x="998" y="229" font-size="13" fill="#536c7d">Heuristic demo: 30 / 60 / 120 min</text>
+<rect x="981" y="355" width="249" height="94" rx="13" fill="#fff3ed" stroke="#dabca8"/><text x="998" y="385" font-size="17" font-weight="700" fill="#152d40">Forecast withheld</text><text x="998" y="410" font-size="13" fill="#536c7d">No risk or forecast output</text>
+<path d="M332 203H367V290H396 M332 298H396 M332 392H366V303H396" stroke="#52879a" stroke-width="2.6" fill="none" marker-end="url(#a)"/>
+<path d="M623 296H690" stroke="#52879a" stroke-width="2.6" fill="none" marker-end="url(#a)"/>
+<path d="M909 276H945V229H981" stroke="#52879a" stroke-width="2.6" fill="none" marker-end="url(#a)"/>
+<path d="M909 323H946V397H981" stroke="#bd765a" stroke-width="2.6" fill="none" marker-end="url(#warn)"/>
+<text x="920" y="215" font-size="13" fill="#497281" font-weight="700">VALID</text><text x="925" y="382" font-size="13" fill="#b06d52" font-weight="700">UNRELIABLE</text>
+<rect x="397" y="398" width="511" height="79" rx="12" fill="#e7f0f3" stroke="#b7cbd0" stroke-dasharray="5 4"/>
+<text x="420" y="429" font-size="17" font-weight="700" fill="#163649">Forecast verification and replay audit</text><text x="420" y="455" font-size="13" fill="#617d88">Later observed glucose resolves eligible earlier predictions; timeline preserved</text>
+<path d="M1106 283V330H955V438H909" stroke="#638895" stroke-width="2" stroke-dasharray="5 7" fill="none" marker-end="url(#a)"/>
+<path d="M397 436H367V338H396" stroke="#638895" stroke-width="2" stroke-dasharray="5 7" fill="none" marker-end="url(#a)"/>
+<g>
+<rect x="49" y="536" width="1181" height="153" rx="16" fill="#152c3c"/>
+<rect x="65" y="554" width="6" height="112" rx="3" fill="#8fd8c4"/>
+<text x="89" y="574" font-size="18" font-weight="730" fill="#e8f7f3">Independent research evidence — not the live demo model</text>
+<text x="89" y="604" font-size="15" fill="#bad0d9">CGMacros patient-grouped benchmark (45 participants) · canonical training / model promotion gates</text>
+<text x="89" y="635" font-size="14" fill="#d1e0e5">scikit-learn regression + event classifier; results reported separately and not reproduced by runtime trainer.</text>
+<text x="89" y="663" font-size="14" fill="#9bc4c6">No automatic trained-model promotion. No clinical use, dose recommendation or validated risk calibration.</text>
+</g>
+<text x="50" y="718" font-size="12" fill="#667f87">Architecture map derived from repository components · excludes unvalidated future integrations · October 2026</text>
+</g></svg>
