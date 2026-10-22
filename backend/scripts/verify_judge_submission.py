@@ -59,6 +59,20 @@ def verify(expected_file: Path | None = None) -> dict:
     recovery = records.get('recovery', {})
     check('recovery_restores_synthetic_forecasts', bool(recovery) and
           recovery['forecast_status'] == 'AVAILABLE' and bool(recovery['forecasts']))
+    # Verify that independently minted visitor cookies do not share replay state.
+    isolated = TestClient(app)
+    isolated.get('/api/patients')
+    client.post('/api/replay/HDT-027/reset')
+    isolated.post('/api/replay/HDT-027/reset')
+    client.post('/api/replay/HDT-027/step?steps=10')
+    independent_snapshot = isolated.get('/api/replay/HDT-027/snapshot')
+    check('independent_browser_replay_isolation',
+          independent_snapshot.status_code == 200 and
+          independent_snapshot.json().get('twin_version') == 1 and
+          client.cookies.get('hdt_demo_session') != isolated.cookies.get('hdt_demo_session'))
+    client.post('/api/demo/chapter/sensor_gap')
+    check('other_browser_unchanged_after_chapter_jump',
+          isolated.get('/api/replay/HDT-027/snapshot').json().get('twin_version') == 1)
     st = client.get('/api/model/status')
     check('trained_runtime_not_promoted', st.status_code == 200 and
           st.json().get('runtime_promotion_allowed') is False)
