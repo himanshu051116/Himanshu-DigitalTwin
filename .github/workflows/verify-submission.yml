@@ -1,0 +1,45 @@
+name: Verify Digital Twin submission
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    paths:
+      - "README.md"
+      - "SUBMISSION_CHECKLIST.md"
+      - "JUDGE_START_HERE.md"
+      - "backend/**"
+      - "submission/**"
+      - "himanshusubh1510_MITS_Gwalior/**"
+      - ".github/workflows/verify-submission.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-inventory:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Python test requirements
+        run: python -m pip install --disable-pip-version-check -r backend/requirements.txt
+      - name: Run unit and regression tests
+        run: python -m pytest backend/tests -q
+      - name: Verify synthetic judge replay
+        run: python backend/scripts/verify_judge_submission.py
+      - name: Check submission inventory (pending video is not a code failure)
+        shell: bash
+        run: |
+          set +e
+          python backend/scripts/submission_readiness.py > submission_readiness.log
+          status=$?
+          set -e
+          cat submission_readiness.log
+          if [ "$status" -eq 2 ]; then
+            echo "::notice::Submission remains NOT_READY while mandatory metadata/video/registration attestations are incomplete."
+          elif [ "$status" -ne 0 ]; then
+            exit "$status"
+          fi
