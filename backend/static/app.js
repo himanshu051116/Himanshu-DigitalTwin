@@ -62,16 +62,18 @@ function displayReplayError(error){
 async function reset(){
  running=false;clearInterval(timer);$('#runBtn').textContent='Run replay';
  try{
-  const result=await queueReplay(()=>api(`/api/replay/${pid}/reset`,{method:'POST'}));
-  snap=result;render();
+  const target=pid;
+  const result=await queueReplay(()=>api(`/api/replay/${target}/reset`,{method:'POST'}));
+  if(target===pid){snap=result;render();}
  }catch(error){displayReplayError(error);throw error;}
 }
 async function step(n=1){
  if(stepQueued)return;
  stepQueued=true;
  try{
-  const result=await queueReplay(()=>api(`/api/replay/${pid}/step?steps=${n}`,{method:'POST'}));
-  snap=result;render();
+  const target=pid;
+  const result=await queueReplay(()=>api(`/api/replay/${target}/step?steps=${n}`,{method:'POST'}));
+  if(target===pid){snap=result;render();}
  }catch(error){displayReplayError(error);}
  finally{stepQueued=false;}
 }
@@ -150,7 +152,7 @@ $('#judgeDemoBtn').addEventListener('click',async()=>{
  const button=$('#judgeDemoBtn'),chapter=$('#judgeChapter').value;
  button.disabled=true;button.textContent='Loading chapter…';
  try{
-  const d=await api(`/api/demo/chapter/${chapter}`,{method:'POST'});
+  const d=await queueReplay(()=>api(`/api/demo/chapter/${chapter}`,{method:'POST'}));
   pid=d.snapshot.patient.patient_id;
   $('#patientSelect').value=pid;
   snap=d.snapshot;render();
@@ -161,7 +163,7 @@ $('#judgeDemoBtn').addEventListener('click',async()=>{
 $('#patientSelect').addEventListener('change',async e=>{running=false;clearInterval(timer);$('#runBtn').textContent='Run replay';pid=e.target.value;await reset()});
 $('#runBtn').addEventListener('click',()=>{running=!running;$('#runBtn').textContent=running?'Pause replay':'Run replay';clearInterval(timer);if(running)timer=setInterval(()=>step(Number($('#speedSelect').value)),1000)});
 $('#stepBtn').addEventListener('click',()=>step(1)); $('#resetBtn').addEventListener('click',()=>reset().catch(()=>{}));
-$('#loadRealBtn').addEventListener('click',async()=>{const sel=$('#realSubject'), id=sel.value;if(!id)return;const kind=sel.selectedOptions[0]?.dataset.kind;running=false;clearInterval(timer);const path=kind==='CGMacros'?`/api/real/cgmacros/load/${id}`:`/api/real/shanghai/load/${id}`;snap=await api(path,{method:'POST'});pid=snap.patient.patient_id;let opt=[...$('#patientSelect').options].find(o=>o.value===pid);if(!opt){opt=document.createElement('option');opt.value=pid;opt.textContent=pid;$('#patientSelect').appendChild(opt)}$('#patientSelect').value=pid;render()});
+$('#loadRealBtn').addEventListener('click',async()=>{const sel=$('#realSubject'), id=sel.value;if(!id)return;const kind=sel.selectedOptions[0]?.dataset.kind;running=false;clearInterval(timer);const path=kind==='CGMacros'?`/api/real/cgmacros/load/${id}`:`/api/real/shanghai/load/${id}`;snap=await queueReplay(()=>api(path,{method:'POST'}));pid=snap.patient.patient_id;let opt=[...$('#patientSelect').options].find(o=>o.value===pid);if(!opt){opt=document.createElement('option');opt.value=pid;opt.textContent=pid;$('#patientSelect').appendChild(opt)}$('#patientSelect').value=pid;render()});
 $$('.tab').forEach(b=>b.addEventListener('click',()=>{
  $$('.tab').forEach(x=>x.classList.remove('active'));
  b.classList.add('active');
@@ -170,4 +172,4 @@ $$('.tab').forEach(b=>b.addEventListener('click',()=>{
 }));
 $('#carbSlider').addEventListener('input',e=>$('#carbLabel').textContent=e.target.value+' g'); $('#activitySlider').addEventListener('input',e=>$('#activityLabel').textContent=Math.round(e.target.value*100)+'%');
 $('#scenarioBtn').addEventListener('click',async()=>{const d=await api('/api/scenario',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({patient_id:pid,carbs_g:Number($('#carbSlider').value),activity:Number($('#activitySlider').value)})}); $('#scenarioResult').className='scenario-rows'; $('#scenarioResult').innerHTML=d.baseline.map((b,i)=>{const s=d.scenario[i],delta=s.personalized-b.personalized;return `<div class="scenario-row"><span>+${b.horizon_min} min</span><div><small>Current</small><strong>${b.personalized}</strong></div><div><small>Scenario</small><strong>${s.personalized}</strong></div><div class="${delta>0?'upText':'downText'}">${delta>0?'+':''}${delta.toFixed(1)} mg/dL</div></div>`}).join('')+`<p class="safety-note">${d.note}</p>`});
-init().catch(e=>{document.body.innerHTML='<pre style="color:white">Startup error: '+e.message+'</pre>'});
+init().catch(e=>{const pre=document.createElement('pre');pre.style.color='white';pre.textContent='Startup error: '+(e instanceof Error?e.message:String(e));document.body.replaceChildren(pre)});
