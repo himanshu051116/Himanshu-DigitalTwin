@@ -23,7 +23,7 @@ Open **http://127.0.0.1:8000**. In the dashboard, choose the **Guided judge demo
 
 | Deliverable | Location |
 |---|---|
-| Six-slide hackathon presentation | [Text overview](submission/PRESENTATION_OVERVIEW.md) · slide PDF/PPTX awaiting binary upload |
+| Six-slide hackathon presentation | [Open browser slides](submission/Presentation.html) · [Text overview](submission/PRESENTATION_OVERVIEW.md) · original PDF/PPTX awaiting binary upload |
 | System architecture | [PDF](submission/architecture.pdf) · editable PPTX awaiting binary upload |
 | Demo and recording outline | [Walkthrough](submission/DEMO_RUNBOOK.md) · [Video plan](submission/VIDEO_RECORDING_PLAN.md) |
 | Claim-to-evidence guide | [Evidence index](submission/JUDGE_EVIDENCE_INDEX.md) |
@@ -53,7 +53,7 @@ FastAPI and Python for the API and model/evidence pipeline; HTML, CSS and JavaSc
 
 ## Status
 
-The source code and accompanying text documentation are committed. The architecture PDF is available. The slide PDF/PPTX, architecture PPTX and slide preview are pending binary upload; [the text-only pitch overview](submission/PRESENTATION_OVERVIEW.md) is available meanwhile. A recorded demonstration video and confirmed Unstop submission receipt must be supplied separately; neither is claimed by this README.
+The source code, browser-based six-slide presentation, text documentation and architecture PDF are committed. The original slide PDF/PPTX, architecture PPTX and preview image are not yet in this repository. For now, download [Presentation.html](submission/Presentation.html) and open it in a browser (or use Print → Save as PDF). A recorded demonstration video and confirmed Unstop submission receipt must be supplied separately; neither is claimed by this README.
 
 ## License
 
