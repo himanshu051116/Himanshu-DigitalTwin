@@ -10,6 +10,8 @@ A patient-specific view of what glucose may do next. Historical patient context 
 ## 2. Clinical problem and patient example
 A glucose reading is a snapshot, not a forecast. In one **synthetic replay**, the patient has 144 mg/dL glucose at 12:15 PM, 59.7 g recent carbohydrate context and wearable heart rate of 82 bpm. Demonstration forecasts are 155.5 mg/dL (+30 minutes), 156 mg/dL (+60 minutes) and 145.4 mg/dL (+120 minutes). These are illustrative, not clinically calibrated.
 
+The editable [architecture graphic](../docs/assets/system-architecture.svg) and [technical mapping](../docs/ARCHITECTURE_AND_MODELS.md) accompany the [architecture PDF](architecture.pdf). The visual distinguishes the active synthetic replay from unpromoted independent research models.
+
 ## 3. System architecture
 The twin combines patient phenotype and historical patterns with CGM readings, meal and activity/wearable information. It updates a patient state, produces horizon-specific glucose scenarios, checks observation reliability and may withhold predictions. A later valid glucose observation can be compared with the previously stored forecast.
 
