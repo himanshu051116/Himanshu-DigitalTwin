@@ -9,6 +9,8 @@ on:
       - "SUBMISSION_CHECKLIST.md"
       - "JUDGE_START_HERE.md"
       - "backend/**"
+      - "docs/**"
+      - "frontend/**"
       - "submission/**"
       - "himanshusubh1510_MITS_Gwalior/**"
       - ".github/workflows/verify-submission.yml"
@@ -43,3 +45,17 @@ jobs:
           elif [ "$status" -ne 0 ]; then
             exit "$status"
           fi
+
+  optional-frontend-typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Next.js frontend dependencies
+        working-directory: frontend
+        run: npm install --no-audit --no-fund --package-lock=false
+      - name: Check TypeScript source
+        working-directory: frontend
+        run: npx tsc --noEmit
