@@ -29,6 +29,10 @@ Open `http://127.0.0.1:8000` and navigate the six **Guided judge demo** checkpoi
 | Population model is not silently activated | `GET /api/model/status` and `backend/tests/test_artifacts.py` | Unapproved trained candidates remain unpromoted in this packaged runtime |
 | Submission completeness | `backend/scripts/submission_readiness.py` with `submission/submission_metadata.json` | Local file inventory and self-attested link fields **only**; not verification that Unstop accepted the entry |
 
+## Browser replay state
+
+The default FastAPI app now keeps separate ephemeral synthetic replay states per browser cookie. The test file `backend/tests/test_browser_session_isolation.py` and the judge verification script check that two clients maintain independent replay versions. This is not authentication, persistence, or clinical-data security.
+
 ## Scientific metrics: interpret with explicit limitations
 
 The independent CGMacros experiment involved **45 participants**: 15 with no diabetes, 16 with prediabetes and 14 with Type-2 diabetes. The primary participant-held-out split contained **35 training / 10 holdout participants**, of whom **3 holdout participants had T2D**.
