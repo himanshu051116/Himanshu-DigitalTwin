@@ -41,7 +41,7 @@ def test_invalid_cookie_mints_a_new_server_owned_token():
     real.get("/api/patients")
     token = real.cookies.get(COOKIE_NAME)
     visitor = TestClient(app)
-    visitor.cookies.set(COOKIE_NAME, "attacker-chosen-unknown-value")
+    visitor.cookies.set(COOKIE_NAME, "attacker-chosen-unknown-value", domain="testserver.local", path="/")
     response = visitor.get("/api/patients")
     assert response.status_code == 200
     assert visitor.cookies.get(COOKIE_NAME) != token
