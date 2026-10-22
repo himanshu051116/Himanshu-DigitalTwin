@@ -28,6 +28,7 @@ async function refreshRealSubjects(){
  const opts=[...d.shanghai.map(x=>({id:x,kind:'ShanghaiT2DM'})),...d.cgmacros.map(x=>({id:x,kind:'CGMacros'}))];
  $('#realSubject').innerHTML=opts.length?opts.map(o=>`<option value="${text(o.id)}" data-kind="${text(o.kind)}">${text(o.kind)} · ${text(o.id)}</option>`).join(''):'<option value="">No local real cohort downloaded</option>';
  $('#loadRealBtn').disabled=!opts.length;
+ document.querySelector('.real-load').classList.toggle('hidden',opts.length===0);
  const cgReady=d.cgmacros.length===45?'CGMacros complete':'CGMacros incomplete'; const shReady=d.shanghai.length===100?'Shanghai complete':'Shanghai incomplete'; $('#realStatus').textContent=opts.length?`${d.shanghai.length}/100 Shanghai · ${d.cgmacros.length}/45 CGMacros · ${cgReady} · ${shReady}`:'Download a cohort to enable real replay';
 }
 async function refreshModelEvidence(){
