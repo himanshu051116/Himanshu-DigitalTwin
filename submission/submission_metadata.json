@@ -7,10 +7,10 @@
   "team_members": [],
   "registration_confirmed": false,
   "public_github_repo_url": "https://github.com/himanshu051116/Himanshu-DigitalTwin",
-  "public_repository_confirmed": false,
+  "public_repository_confirmed": true,
   "demo_video_url": "",
   "demo_video_duration_minutes": 0,
   "video_link_access_confirmed": false,
   "submission_platform_entry_confirmed": false,
-  "notes": "The repository URL is public but was empty at verification; do not mark publication complete before pushing and reviewing the uploaded code. Add private phone/email on Unstop, not here."
+  "notes": "The repository is public and has committed runnable application source, documentation, and browser-based presentation. Printable PDF and PowerPoint are produced by the presentation build workflow. Registration, 20-minute video, and Unstop receipt remain unconfirmed."
 }

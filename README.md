@@ -23,8 +23,8 @@ Open **http://127.0.0.1:8000**. In the dashboard, choose the **Guided judge demo
 
 | Deliverable | Location |
 |---|---|
-| Six-slide hackathon presentation | [Open browser slides](submission/Presentation.html) · [Text overview](submission/PRESENTATION_OVERVIEW.md) · original PDF/PPTX awaiting binary upload |
-| System architecture | [PDF](submission/architecture.pdf) · editable PPTX awaiting binary upload |
+| Six-slide hackathon presentation | [PowerPoint](submission/HimanshuDigitalTwin_Presentation.pptx) · [PDF](submission/HimanshuDigitalTwin_Presentation.pdf) · [Preview](submission/Preview_All_Six_Slides.png) · [Browser slides](submission/Presentation.html) |
+| System architecture | [PDF](submission/architecture.pdf) · [workflow explanation](submission/PRESENTATION_OVERVIEW.md) |
 | Demo and recording outline | [Walkthrough](submission/DEMO_RUNBOOK.md) · [Video plan](submission/VIDEO_RECORDING_PLAN.md) |
 | Claim-to-evidence guide | [Evidence index](submission/JUDGE_EVIDENCE_INDEX.md) |
 | Independent CGMacros evidence | `backend/reports/research/` and `GET /api/research/evidence` |
@@ -53,7 +53,7 @@ FastAPI and Python for the API and model/evidence pipeline; HTML, CSS and JavaSc
 
 ## Status
 
-The source code, browser-based six-slide presentation, text documentation and architecture PDF are committed. The original slide PDF/PPTX, architecture PPTX and preview image are not yet in this repository. For now, download [Presentation.html](submission/Presentation.html) and open it in a browser (or use Print → Save as PDF). A recorded demonstration video and confirmed Unstop submission receipt must be supplied separately; neither is claimed by this README.
+The source code, browser-based six-slide presentation, PDF, PPTX, preview and architecture PDF are included. The PDF and PowerPoint are automatically generated from [Presentation.html](submission/Presentation.html) by [GitHub Actions](.github/workflows/build-presentation.yml); slides in the generated PPTX are page images rather than editable text/shapes. The browser source remains editable. The interactive demonstration uses simulated patient records, not the independent benchmark model. A demonstration video and confirmed Unstop submission receipt must be supplied separately; neither is claimed here.
 
 ## License
 

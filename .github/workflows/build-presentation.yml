@@ -1,4 +1,4 @@
-name: Build judge presentation PDF
+name: Build judge presentation exports
 
 on:
   workflow_dispatch:
@@ -20,32 +20,61 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install renderer and PDF validator
-        run: python -m pip install --disable-pip-version-check weasyprint pypdf
-      - name: Render presentation and verify slide count
+      - name: Install presentation exporters
+        run: python -m pip install --disable-pip-version-check weasyprint pypdf pymupdf python-pptx pillow
+      - name: Render and verify six-slide exports
         run: |
           python - <<'PY'
+          from io import BytesIO
           from pathlib import Path
-          from weasyprint import HTML
+          import fitz
+          from PIL import Image, ImageOps, ImageDraw
+          from pptx import Presentation
+          from pptx.util import Inches
           from pypdf import PdfReader
+          from weasyprint import HTML
 
-          source = Path("submission/Presentation.html")
-          target = Path("submission/HimanshuDigitalTwin_Presentation.pdf")
-          HTML(filename=str(source), base_url=str(source.parent.resolve())).write_pdf(str(target))
-          pages = len(PdfReader(str(target)).pages)
-          print(f"Generated PDF: {target}, pages={pages}")
-          for i, page in enumerate(PdfReader(str(target)).pages, 1):
-              sample = " ".join((page.extract_text() or "").split())[:120]
-              print(f"PAGE {i} TEXT: {sample}")
-          if pages != 6:
-              raise SystemExit("Expected exactly six slide pages")
+          folder = Path("submission")
+          source = folder / "Presentation.html"
+          pdf = folder / "HimanshuDigitalTwin_Presentation.pdf"
+          pptx = folder / "HimanshuDigitalTwin_Presentation.pptx"
+          preview = folder / "Preview_All_Six_Slides.png"
+
+          HTML(filename=str(source), base_url=str(folder.resolve())).write_pdf(str(pdf))
+          assert len(PdfReader(str(pdf)).pages) == 6, "PDF does not contain six slides"
+
+          deck = Presentation()
+          deck.slide_width, deck.slide_height = Inches(16), Inches(9)
+          deck.core_properties.title = "HimanshuDigitalTwin — Six-slide submission"
+          deck.core_properties.author = "Himanshu Shukla"
+          blank = deck.slide_layouts[6]
+          tiles = []
+
+          with fitz.open(str(pdf)) as document:
+              assert document.page_count == 6, "Incorrect page count"
+              for page in document:
+                  pixels = page.get_pixmap(matrix=fitz.Matrix(1.6, 1.6), alpha=False)
+                  payload = pixels.tobytes("png")
+                  slide = deck.slides.add_slide(blank)
+                  slide.shapes.add_picture(BytesIO(payload), 0, 0, deck.slide_width, deck.slide_height)
+                  pic = Image.open(BytesIO(payload)).convert("RGB")
+                  pic.thumbnail((720, 405), Image.Resampling.LANCZOS)
+                  tiles.append(ImageOps.pad(pic, (720, 405), method=Image.Resampling.LANCZOS))
+
+          deck.save(str(pptx))
+          assert len(Presentation(str(pptx)).slides) == 6, "PPTX does not contain six slides"
+          montage = Image.new("RGB", (2160, 810), "#e4e8eb")
+          for n, tile in enumerate(tiles):
+              montage.paste(tile, ((n % 3) * 720, (n // 3) * 405))
+          montage.save(preview, optimize=True)
+          print(f"Verified 6-slide exports: {pdf}, {pptx}, {preview}")
           PY
-      - name: Commit rendered PDF
+      - name: Commit generated presentation files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add submission/HimanshuDigitalTwin_Presentation.pdf
+          git add submission/HimanshuDigitalTwin_Presentation.pdf submission/HimanshuDigitalTwin_Presentation.pptx submission/Preview_All_Six_Slides.png
           if ! git diff --cached --quiet; then
-            git commit -m "Publish printable six-slide presentation PDF"
+            git commit -m "Publish six-slide PDF, PowerPoint and preview"
             git push origin HEAD:main
           fi
