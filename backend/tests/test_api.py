@@ -22,6 +22,8 @@ def test_static_prototype_assets():
     assert c.get('/prototype/styles.css').status_code==200
 
 def test_websocket_replay_emits_snapshot():
+    # A WebSocket cannot mint the HTTP-only browser cookie itself.
+    assert c.get('/api/patients').status_code == 200
     with c.websocket_connect('/ws/replay/HDT-041') as ws:
         msg=ws.receive_json()
         assert msg['patient']['patient_id']=='HDT-041'
