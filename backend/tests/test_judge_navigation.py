@@ -49,7 +49,8 @@ def test_first_screen_has_run_command_screenshots_and_truthful_boundaries():
         "Sensor gap",
     ):
         assert required.lower() in first.lower(), f"Missing top-level judge signal: {required}"
-    assert "not the performance of the running demo" in readme.lower()
+    plain = re.sub(r"[*_`]", "", readme.lower())
+    assert "not the performance of the running demo" in plain
     assert "not yet" in readme.lower()  # Unlisted recording is still missing.
 
 
