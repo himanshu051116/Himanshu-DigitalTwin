@@ -58,35 +58,59 @@ function MiniChart({history,forecasts,timestamp,validReading}:{history:HistoryRe
   </svg>;
 }
 
+function errorText(e:unknown){ return e instanceof Error?e.message:'Unexpected API failure'; }
+
 function Badge({children,tone='neutral'}:{children:React.ReactNode;tone?:string}){ return <span className={`badge ${tone}`}>{children}</span>; }
 
 export default function Home(){
   const [patients,setPatients]=useState<Patient[]>([]); const [pid,setPid]=useState('HDT-027'); const [snap,setSnap]=useState<Snap|null>(null);
+  const [error,setError]=useState(''); const [chapter,setChapter]=useState('baseline'); const skipNextReset=useRef(false);
   const [running,setRunning]=useState(false); const [speed,setSpeed]=useState(1); const timer=useRef<ReturnType<typeof setInterval>|null>(null);
   const [tab,setTab]=useState<'twin'|'scenario'|'evidence'>('twin'); const [scenario,setScenario]=useState<any>(null); const [scenarioInputs,setScenarioInputs]=useState({carbs:70,activity:.2});
   const request=useCallback(async(path:string,opts?:RequestInit)=>{ const r=await fetch(API+path,opts); if(!r.ok) throw new Error(await r.text()); return r.json(); },[]);
   const reset=useCallback(async(id=pid)=>{ const d=await request(`/api/replay/${id}/reset`,{method:'POST'}); setSnap(d);setScenario(null); },[pid,request]);
   const step=useCallback(async(count=1)=>{ const d=await request(`/api/replay/${pid}/step?steps=${count}`,{method:'POST'}); setSnap(d); },[pid,request]);
-  useEffect(()=>{request('/api/patients').then((p)=>{setPatients(p); if(p.length)setPid(p[0].patient_id);}).catch(console.error)},[request]);
-  useEffect(()=>{ if(pid) reset(pid).catch(console.error); },[pid]);
-  useEffect(()=>{ if(timer.current) clearInterval(timer.current); if(running){ timer.current=setInterval(()=>step(speed).catch(()=>setRunning(false)),1000);} return()=>{if(timer.current)clearInterval(timer.current)}; },[running,speed,step]);
+  useEffect(()=>{request('/api/patients').then((p)=>{if(!Array.isArray(p)||p.length===0)throw new Error('No demo patients available');setPatients(p);setPid(p[0].patient_id);}).catch(e=>setError(errorText(e)))},[request]);
+  useEffect(()=>{if(skipNextReset.current){skipNextReset.current=false;return;}if(pid)reset(pid).catch(e=>setError(errorText(e)));},[pid]);
+  useEffect(()=>{if(timer.current)clearInterval(timer.current);if(running){timer.current=setInterval(()=>step(speed).catch(e=>{setRunning(false);setError(errorText(e))}),1000);}return()=>{if(timer.current)clearInterval(timer.current)};},[running,speed,step]);
   const riskAvailable=typeof snap?.excursion_risk==='number' && (snap?.forecasts.length??0)>0;
   const riskPct=riskAvailable?Math.round((snap!.excursion_risk as number)*100):null;
   const riskTone=riskPct===null?'neutral':riskPct>=70?'danger':riskPct>=45?'warn':riskPct>=20?'caution':'good';
   const improvement=useMemo(()=>{if(!snap)return null; const a=snap.model_metrics.population_mae,b=snap.model_metrics.personalized_mae; if(typeof a==='number'&&typeof b==='number'&&a>0)return ((a-b)/a*100);return null},[snap]);
-  async function runScenario(){ const d=await request('/api/scenario',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({patient_id:pid,carbs_g:scenarioInputs.carbs,activity:scenarioInputs.activity})});setScenario(d); }
-  if(!snap) return <main className="loading">Initializing HimanshuDigitalTwin…</main>;
+  async function runScenario(){try{const d=await request('/api/scenario',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({patient_id:pid,carbs_g:scenarioInputs.carbs,activity:scenarioInputs.activity})});setScenario(d);setError('');}catch(e){setError(errorText(e));}}
+  async function showChapter(){
+    setRunning(false);
+    try{
+      const d=await request('/api/demo/chapter/'+chapter,{method:'POST'});
+      if(d.simulation_only!==true||!d.snapshot)throw new Error('Unexpected guided demo response');
+      if(pid!==d.snapshot.patient.patient_id){skipNextReset.current=true;setPid(d.snapshot.patient.patient_id);}
+      setSnap(d.snapshot);setScenario(null);setTab('twin');setError('');
+    }catch(e){setError(errorText(e));}
+  }
+  if(!snap) return <main className="loading" role="status">{error?'Unable to start the research demo: '+error:'Initializing synthetic research demo…'}</main>;
   return <main>
     <header className="topbar">
       <div><div className="brandRow"><div className="mark">HD</div><div><h1>HimanshuDigitalTwin</h1><p>Synthetic patient replay · research prototype</p></div></div></div>
       <div className="headerActions"><Badge tone={snap.sync_status==='SYNCHRONIZED'?'good':'warn'}>● {snap.sync_status}</Badge><Badge>v{snap.twin_version.toLocaleString()}</Badge></div>
     </header>
     <div className="disclaimer">Research demonstration only · Default replay and risk are synthetic and uncalibrated · No diagnosis, dosing, or treatment recommendation.</div>
+    {error && <div className="disclaimer" role="alert">Dashboard request failed: {error} <button type="button" onClick={()=>setError('')}>Dismiss</button></div>}
     <nav className="nav"><button className={tab==='twin'?'active':''} onClick={()=>setTab('twin')}>Twin workspace</button><button className={tab==='scenario'?'active':''} onClick={()=>setTab('scenario')}>Scenario lab</button><button className={tab==='evidence'?'active':''} onClick={()=>setTab('evidence')}>Evidence & safety</button></nav>
     <section className="controls card">
       <div><label>Patient</label><select value={pid} onChange={e=>{setRunning(false);setPid(e.target.value)}}>{patients.map(p=><option key={p.patient_id}>{p.patient_id}</option>)}</select></div>
       <div className="profileQuick"><span>{snap.patient.age} y</span><span>{snap.patient.sex}</span><span>BMI {snap.patient.bmi}</span><span>HbA1c {snap.patient.hba1c}%</span></div>
       <div className="playback"><button className="primary" onClick={()=>setRunning(v=>!v)}>{running?'Pause replay':'Run replay'}</button><button onClick={()=>step(1)}>Step</button><button onClick={()=>reset()}>Reset</button><select value={speed} onChange={e=>setSpeed(Number(e.target.value))}><option value={1}>1×</option><option value={3}>3×</option><option value={6}>6×</option><option value={12}>12×</option></select></div>
+    </section>
+
+    <section className="guidedChapters card" aria-label="Guided judge demonstration">
+      <div><strong>Guided judge demo</strong><p>Six reproducible synthetic checkpoints, including sensor gap and recovery</p></div>
+      <label htmlFor="judgeChapterNext">Chapter</label>
+      <select id="judgeChapterNext" value={chapter} onChange={e=>setChapter(e.target.value)}>
+        <option value="baseline">1 · Baseline</option><option value="breakfast">2 · Breakfast</option>
+        <option value="lunch">3 · Lunch</option><option value="verification">4 · Verification</option>
+        <option value="sensor_gap">5 · Sensor gap</option><option value="recovery">6 · Recovery</option>
+      </select>
+      <button onClick={showChapter}>Show chapter</button>
     </section>
 
     {tab==='twin' && <>
