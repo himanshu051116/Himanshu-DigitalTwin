@@ -16,7 +16,7 @@ This document describes the code in this repository, **not** a deployed clinical
 
 1. **Profile and observations.** `backend/app/data.py` creates synthetic patient streams. `backend/app/real_replay.py` contains separately gated real-cohort adapters when data is legitimately available locally. No private cohort data is required for the synthetic judge walkthrough.
 2. **Synchronized state.** `ReplaySession` in `backend/app/engine.py` maintains timestamps, history, version, prediction reconciliation and an event timeline.
-3. **Sensor quality.** If glucose is missing, out-of-date, or otherwise unreliable, the replay does **not** invent a valid reading. The canonical judge sensor-gap case returns a null glucose, an empty forecast array, and no excursion risk, with `forecast_status=ABSTAINED`.
+3. **Sensor quality.** The model internally carries the last valid glucose over brief gaps. The public `recent_history` now publishes **null** rather than that carried value for a missing or outlier measurement. For up to 15 minutes from the last valid reading, a forecast may remain available as an extrapolation. Once stale, the judge sensor-gap returns a null current glucose, empty forecasts, and no excursion risk with `forecast_status=ABSTAINED`. That distinction is important: a provisional forecast is not a new observed sensor sample.
 4. **Active prediction.** In the default environment the simulation uses the `demo-heuristic` forecaster from `backend/app/model.py`; three time horizons are presented at +30, +60 and +120 minutes. **Demo risk percentages and forecast intervals are not calibrated medical estimates.**
 5. **Reconciliation.** When a later synthetic observation has reached the horizon of a pending forecast, the engine can record the deviation, update replay-specific residual information and preserve audit events. This does not establish real-world personalized benefit.
 6. **Model promotion.** `backend/app/artifacts.py` and model-status checks restrict what trained artifacts may replace the default runtime. Passing software tests alone never promotes a research candidate.
@@ -85,7 +85,11 @@ Open `http://127.0.0.1:8000`, select **Guided judge demo** and visit the **Senso
 
 For submission metadata, run `python backend/scripts/submission_readiness.py` from the root. A `NOT_READY` report is expected while team registration, an accessible minimum-20-minute video, and competition-platform submission remain unconfirmed. The checker validates local inventory and self-attestations, not actual portal acceptance.
 
-## 7. Security, licensing and scope
+## 7. Deployment and shared-session limitations
+
+The current FastAPI app stores `SESSIONS` in a module-global dictionary. It is **not isolated by browser, user or team**, so two simultaneous visitors can alter the same patient's replay. It is ephemeral, lacks production authentication and persistence, and is not suitable for an open multiuser or clinical deployment. CI checks can validate code and replay behavior, but cannot establish load handling, privacy compliance, anonymous access or clinical safety. The documented `127.0.0.1` run mode is intended for local judging.
+
+## 8. Security, licensing and scope
 
 - Keep identifiable medical data, private CGM exports, credentials, and protected third-party datasets out of the public repo.
 - The [MIT LICENSE](../LICENSE) covers the repository software and documentation; upstream datasets retain their original terms.
