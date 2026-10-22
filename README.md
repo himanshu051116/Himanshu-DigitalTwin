@@ -27,7 +27,7 @@ A glucose reading describes the **present**, but not what will happen after a me
 
 ## What the prototype does
 
-The demonstrator combines baseline patient context with time-stamped sensor-style observations, updates a patient-specific digital state, displays a forecast and contextual contributors, and records outcomes for later comparison. It **withholds the forecast and risk** during the demonstrated missing/stale sensor condition. The guided replay is deterministic and uses **synthetic data**, so judges can run it without downloading medical records.
+The demonstrator combines baseline patient context with time-stamped sensor-style observations, updates a patient-specific digital state, displays a forecast and contextual contributors, and records outcomes for later comparison. It **withholds the forecast and risk** during the demonstrated stale-sensor condition. Within a short sensor gap (up to the 15-minute freshness rule), estimates may still be generated using the last valid reading; these are **extrapolations**, not fresh CGM observations. The public chart hides imputed values and visibly distinguishes the sensor state. The guided replay is deterministic and uses **synthetic data**, so judges can run it without downloading medical records.
 
 ## System architecture
 
@@ -35,7 +35,7 @@ The demonstrator combines baseline patient context with time-stamped sensor-styl
 
 The default application runs an in-memory synthetic replay through `ReplaySession`. Timestamped phenotype, CGM-style readings, meals and activity are converted into a versioned state. A sensor-quality check may deliberately suppress forecasts and risk output. Independent research training artifacts are kept separate from the live heuristic demonstration.
 
-[**Implementation map, model boundaries and key API routes →**](docs/ARCHITECTURE_AND_MODELS.md)
+[**Implementation map, model boundaries and key API routes →**](docs/ARCHITECTURE_AND_MODELS.md) · [**Critical readiness audit →**](docs/TECHNICAL_AUDIT.md)
 
 ### Start the working prototype
 
@@ -95,6 +95,7 @@ Only **three Type-2 diabetes participants** were in the primary ten-person holdo
 | [`frontend/`](frontend/) | Optional Next.js / React / TypeScript interface, **not** the default judge demo |
 | [`backend/reports/research/`](backend/reports/research/) | Independent study reports; not original independent training scripts or participant datasets |
 | [`docs/assets/`](docs/assets/) | Original, vector README graphics (editable SVG) |
+| [`docs/TECHNICAL_AUDIT.md`](docs/TECHNICAL_AUDIT.md) | Confirmed limitations, corrective work, and still-unverified checks |
 | [`submission/`](submission/) | Architecture PDF, six-slide deck, demonstration plan, evidence index and metadata |
 
 ## Judge verification in one session
@@ -141,6 +142,10 @@ The challenge instructions specify the folder naming pattern `Team Name_College 
 - **Registered leader and complete team roster:** require confirmation against the Unstop registration; not inferred here
 - **Incubator:** not confirmed; no incubation claim is made
 - **Licence:** [MIT](LICENSE). The third-party research datasets are governed by their own source terms and are not redistributed with the repository.
+
+## Deployment constraint
+
+**This is a local, single-operator research demonstration, not a multi-tenant service.** The FastAPI app currently keeps its replay sessions in a process-global mutable dictionary. Two browsers controlling the same patient can modify each other's replay, and state is lost on process restart. There is no user authentication, access control, persistent per-user state, or real clinical data-handling system. Do **not** deploy this server publicly as a patient-facing application without addressing these limitations. See the [technical audit](docs/TECHNICAL_AUDIT.md).
 
 ## Evidence and safety boundaries
 
