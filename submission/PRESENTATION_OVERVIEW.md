@@ -11,6 +11,8 @@
 - [PowerPoint — six editable slides](HimanshuDigitalTwin_Presentation.pptx)
 - [Six-page PDF](HimanshuDigitalTwin_Presentation.pdf)
 - [Slide contact sheet](Preview_All_Six_Slides.png)
+- [Actual synthetic lunch dashboard screenshot](Live_Demo_Lunch.png)
+- [Actual synthetic sensor-gap screenshot](Live_Demo_SensorGap.png)
 - [Generator source: editable PowerPoint objects](generate_native_deck.py)
 - [Demonstration instructions](DEMO_RUNBOOK.md)
 
@@ -23,7 +25,7 @@
 | **1 — HimanshuDigitalTwin** | Project identity and a synthetic glucose trajectory | The numbers are illustrative; not a clinical-model output |
 | **2 — The problem** | One observed reading versus three future forecast horizons | 144 mg/dL at 12:15; 155.5/156.0/145.4 at +30/+60/+120 from the bundled synthetic replay |
 | **3 — Architecture** | Profile + sensor + meal/activity → versioned state → quality gate → forecast **or withheld output**; verification loop | A scientific pipeline is not a clinical deployment; FastAPI/HTML/JS is the default dashboard, scikit-learn research is separate |
-| **4 — Working demonstration** | Six real coded checkpoints: baseline, breakfast, lunch, verification, sensor gap, recovery | Storyboard refers to executable `/api/demo/chapter/{chapter_id}` endpoints; it is **not a substitute for a recorded application screenshot/video** |
+| **4 — Working demonstration** | Actual Chromium capture of the FastAPI dashboard at the deterministic synthetic lunch checkpoint, alongside editable chapter notes | `submission/capture_demo.py` starts the real app and validates output before saving the PNG. This is not a clinical screenshot or a substitute for the required full demo video. |
 | **5 — Safety behavior** | Valid glucose versus sensor-stale abstention, including the ≤15-min short-gap caveat | Distinguish an imputed internal value from a measured observation |
 | **6 — Separate research study** | Persistence versus independent-CGMacros-model MAE for 30/60/120 min; 45 participants | Only 3 T2D patients in primary 10-person holdout; model in demo remains heuristic, not the independently evaluated model |
 
@@ -39,6 +41,6 @@
 
 The prior deck was text-led, did not visually trace the state-quality-decision path, and exported PowerPoint as one large bitmap per slide. The new design adds a diagrammatic system decision, a succinct reproducible product demonstration story, and stronger separation between the synthetic demo and independent research findings.
 
-**Further upgrade requiring live assets:** A genuine screenshot of the running dashboard and a short verified recording could improve slide 4, but neither should be invented. Verify the full browser rendering and the GitHub Actions published PPTX/PDF before official use.
+**Screenshot provenance:** The generator crops the genuine Playwright-captured dashboard image to keep the observation-to-forecast signal and chart legible on slide 4; the full uncropped screenshot remains linked above. The PDF and PPTX must be rebuilt with the capture script so the embedded photo remains genuinely reproducible. A minimum-20-minute demonstration recording is still missing and must not be invented.
 
 See [research evidence](JUDGE_EVIDENCE_INDEX.md) and [submission checklist](../SUBMISSION_CHECKLIST.md).
