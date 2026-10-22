@@ -112,6 +112,14 @@ python backend/scripts/submission_readiness.py
 
 The readiness checker is expected to report **NOT_READY** until the real video and registration/submission attestations exist. Its failure exit code is intentional in that state; it does not mean the replay itself failed. Tests validate software behavior, **not** clinical efficacy.
 
+## Actual running interface — synthetic capture
+
+![Actual locally rendered HimanshuDigitalTwin FastAPI dashboard at the synthetic lunch checkpoint](submission/Live_Demo_Lunch.png)
+
+This is a **Playwright screenshot of the running FastAPI dashboard**, automatically captured by [the browser capture script](submission/capture_demo.py) after selecting the bundled *Lunch* judge chapter. The figures are simulated and the risk display is uncalibrated. [See the actual sensor-gap state](submission/Live_Demo_SensorGap.png), where glucose is unavailable and predictions are withheld.
+
+The [editable PowerPoint](submission/HimanshuDigitalTwin_Presentation.pptx) includes a cropped portion of the verified lunch screenshot on slide 4; all surrounding labels, flow cards and other slides remain editable.
+
 ## Judge presentation — editable PowerPoint
 
 The deck has been rebuilt as **six native editable slides** using Python PowerPoint objects. The introduction now illustrates the synthetic glucose scenario; the architecture shows an actual input–state–quality–output flow; the safety slide makes withheld forecasts prominent; and independent CGMacros statistics remain explicitly separate from the live demo. [Review its slide-by-slide design and source](submission/PRESENTATION_OVERVIEW.md).
