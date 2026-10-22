@@ -1,4 +1,6 @@
 from pathlib import Path
+from io import BytesIO
+from PIL import Image
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
@@ -106,7 +108,16 @@ if shot.is_file():
   # Only embed a real image captured from a running localhost application.
   # Every annotation, heading and chapter list remains an editable PowerPoint object.
   card(s,.62,2.43,8.54,4.22,WHITE,GREY)
-  pic=s.shapes.add_picture(str(shot), Inches(.74), Inches(2.55), width=Inches(8.29), height=Inches(3.75))
+  # Crop an authentic screenshot (never redraw chart values) to prioritize the
+  # guided checkpoint, signal-quality strip, vital cards and trajectory.
+  # The original full-size screenshot stays in submission/ for independent review.
+  with Image.open(shot) as image:
+    iw,ih=image.size
+    cropped_h=min(ih, round(iw/(8.29/3.75)))
+    top=max(0,min(round(ih*.23),ih-cropped_h))
+    cropped=image.crop((0,top,iw,top+cropped_h))
+    stream=BytesIO();cropped.save(stream,format='PNG');stream.seek(0)
+  s.shapes.add_picture(stream, Inches(.74), Inches(2.55), width=Inches(8.29), height=Inches(3.75))
   tx(s,'ACTUAL LOCAL DEMO   /   LUNCH CHECKPOINT',.85,6.34,7.98,.22,10,TEAL,True)
   card(s,9.36,2.43,3.32,4.22,'E5F0EE')
   tx(s,'JUDGE PATH',9.63,2.69,2.75,.26,12,TEAL,True)
@@ -156,8 +167,9 @@ card(s,8.33,2.36,4.35,3.94,'E8F0F0')
 tx(s,'EVIDENCE BOUNDARY',8.65,2.66,3.66,.27,12,TEAL,True)
 tx(s,'45',8.65,3.08,1.12,.63,35,INK,True);tx(s,'participants  /  14 with T2D',9.77,3.26,2.63,.28,13,MUTED)
 line(s,8.64,3.85,12.29,3.85,'C6D6D9')
-tx(s,'Only 3 T2D participants in the\n10-person primary holdout.',8.65,4.08,3.55,.91,17,INK,True)
-tx(s,'The study model is NOT the model\nrunning in the synthetic dashboard.',8.65,5.18,3.62,.80,15,ORANGE,True)
+tx(s,'Only 3 T2D participants in the\n10-person primary holdout.',8.65,4.04,3.55,.76,16,INK,True)
+tx(s,'SEPARATE RESEARCH — NOT LIVE RUNTIME',8.65,4.99,3.7,.30,10,ORANGE,True)
+tx(s,'The evaluated study model is NOT\nthe model serving this synthetic demo.',8.65,5.27,3.65,.70,14,ORANGE,True)
 tx(s,'What the judge can verify: deterministic replay, sensor-gap abstention, and research provenance.',.73,6.50,12,.40,15,INK,True)
 
 P.core_properties.title='HimanshuDigitalTwin — Happiest Health six-slide submission'
