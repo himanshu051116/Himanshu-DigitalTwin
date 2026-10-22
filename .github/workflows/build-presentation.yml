@@ -6,7 +6,12 @@ on:
     paths:
       - "submission/generate_native_deck.py"
       - "submission/capture_demo.py"
+      - "backend/static/**"
       - ".github/workflows/build-presentation.yml"
+
+concurrency:
+  group: hdt-presentation-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: write
