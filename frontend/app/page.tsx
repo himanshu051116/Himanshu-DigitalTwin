@@ -63,14 +63,14 @@ function errorText(e:unknown){ return e instanceof Error?e.message:'Unexpected A
 function Badge({children,tone='neutral'}:{children:React.ReactNode;tone?:string}){ return <span className={`badge ${tone}`}>{children}</span>; }
 
 export default function Home(){
-  const [patients,setPatients]=useState<Patient[]>([]); const [pid,setPid]=useState('HDT-027'); const [snap,setSnap]=useState<Snap|null>(null);
+  const [patients,setPatients]=useState<Patient[]>([]); const [pid,setPid]=useState(''); const [snap,setSnap]=useState<Snap|null>(null);
   const [error,setError]=useState(''); const [chapter,setChapter]=useState('baseline'); const skipNextReset=useRef(false);
   const [running,setRunning]=useState(false); const [speed,setSpeed]=useState(1); const timer=useRef<ReturnType<typeof setInterval>|null>(null);
   const [tab,setTab]=useState<'twin'|'scenario'|'evidence'>('twin'); const [scenario,setScenario]=useState<any>(null); const [scenarioInputs,setScenarioInputs]=useState({carbs:70,activity:.2});
-  const request=useCallback(async(path:string,opts?:RequestInit)=>{ const r=await fetch(API+path,opts); if(!r.ok) throw new Error(await r.text()); return r.json(); },[]);
+  const request=useCallback(async(path:string,opts?:RequestInit)=>{ const r=await fetch(API+path,{...opts,credentials:'include'}); if(!r.ok) throw new Error(await r.text()); return r.json(); },[]);
   const reset=useCallback(async(id=pid)=>{ const d=await request(`/api/replay/${id}/reset`,{method:'POST'}); setSnap(d);setScenario(null); },[pid,request]);
   const step=useCallback(async(count=1)=>{ const d=await request(`/api/replay/${pid}/step?steps=${count}`,{method:'POST'}); setSnap(d); },[pid,request]);
-  useEffect(()=>{request('/api/patients').then((p)=>{if(!Array.isArray(p)||p.length===0)throw new Error('No demo patients available');setPatients(p);setPid(p[0].patient_id);}).catch(e=>setError(errorText(e)))},[request]);
+  useEffect(()=>{let live=true;request('/api/patients').then((p)=>{if(!Array.isArray(p)||p.length===0)throw new Error('No demo patients available');if(live){setPatients(p);setPid(p[0].patient_id);}}).catch(e=>{if(live)setError(errorText(e));});return()=>{live=false};},[request]);
   useEffect(()=>{if(skipNextReset.current){skipNextReset.current=false;return;}if(pid)reset(pid).catch(e=>setError(errorText(e)));},[pid]);
   useEffect(()=>{if(timer.current)clearInterval(timer.current);if(running){timer.current=setInterval(()=>step(speed).catch(e=>{setRunning(false);setError(errorText(e))}),1000);}return()=>{if(timer.current)clearInterval(timer.current)};},[running,speed,step]);
   const riskAvailable=typeof snap?.excursion_risk==='number' && (snap?.forecasts.length??0)>0;
