@@ -4,6 +4,8 @@
 
 This index distinguishes features a judge can **execute**, research findings reported from a **separate study**, and important **unverified** claims. Nothing here certifies a clinical device.
 
+**Visual verification aids:** [system architecture](../docs/assets/system-architecture.svg) · [technology stack](../docs/assets/technology-stack.svg) · [independent benchmark chart](../docs/assets/research-evidence.svg). The images are original schematic representations and are **not** screenshots or live model evidence.
+
 ## Verify the working prototype (no real patient dataset required)
 
 From the public repository **root**:
