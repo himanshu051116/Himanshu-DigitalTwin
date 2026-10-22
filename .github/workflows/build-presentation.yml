@@ -50,6 +50,11 @@ jobs:
           preview=folder/"Preview_All_Six_Slides.png"
           deck=Presentation(str(ppt))
           assert len(deck.slides)==6, "Expected six slides"
+          lunch=folder/"Live_Demo_Lunch.png"
+          gap=folder/"Live_Demo_SensorGap.png"
+          assert lunch.is_file() and gap.is_file(), "Live synthetic screenshots were not captured"
+          assert any(shape.shape_type == 13 for shape in deck.slides[3].shapes), (
+              "Slide four must include an actual running-app screenshot")
           assert all(len(slide.shapes)>=12 for slide in deck.slides)
           # Editable: the content is native text and vector shapes, not image-only pages.
           assert all(any(s.has_text_frame and s.text.strip() for s in slide.shapes) for slide in deck.slides)
