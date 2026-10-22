@@ -19,3 +19,28 @@
 @media(max-width:780px){.judge-guide-copy{flex-basis:100%}.judge-info{text-align:left}.controls{flex-wrap:wrap}.playback{flex-wrap:wrap}.quick-profile{flex-basis:100%}}
 
 .risk-mode-flag{display:block;margin:7px 0 2px;color:#ffd892;background:#3d301f;border:1px solid #80603c;padding:5px 8px;border-radius:6px;font-size:10px;font-weight:800;letter-spacing:.045em;line-height:1.35}.metric:has(#riskModelFlag){border-color:#826139}.metric .eyebrow{display:block}.subrow:has(#confidence){flex-wrap:wrap}
+
+
+/* Transparent judge-facing signal pipeline, responsive and keyboard-readable. */
+.signal-flow{padding:15px 18px;margin:0 0 15px;border-color:#2a5964;background:linear-gradient(110deg,#112b3b,#102238)}
+.signal-flow-heading{display:flex;align-items:baseline;justify-content:space-between;gap:15px;margin-bottom:13px}
+.signal-flow-heading strong{font-size:15px;letter-spacing:-.02em}
+.signal-flow-heading span{font-size:12px;color:#a5bfcb}
+.signal-flow-stages{display:grid;grid-template-columns:minmax(0,1fr) 26px minmax(0,1fr) 26px minmax(0,1fr);gap:10px;align-items:center}
+.signal-stage{min-width:0;padding:10px 12px;background:rgba(14,33,49,.65);border:1px solid #2b4e61;border-radius:10px;display:flex;flex-direction:column;gap:6px}
+.signal-number{font-size:10px;font-weight:800;letter-spacing:.10em;color:#84b3c4}
+.signal-stage strong{font-size:16px;color:#eef9fa;white-space:normal;overflow-wrap:anywhere}
+.signal-stage small{font-size:11px;color:#a2b8c5}
+.signal-arrow{font-size:23px;color:#82b7b8;text-align:center}
+.signal-flow[data-status="withheld"]{border-color:#956a4f}
+.signal-flow[data-status="withheld"] .signal-stage:last-child{border-color:#b8876b;background:rgba(70,43,30,.45)}
+.signal-flow[data-status="withheld"] #signalOutput{color:#ffcfab}
+.signal-flow[data-status="extrapolated"] #signalInput{color:#f3d68f}
+@media(max-width:680px){
+ .signal-flow{padding:12px}
+ .signal-flow-heading{display:block}
+ .signal-flow-heading span{display:block;margin-top:5px}
+ .signal-flow-stages{grid-template-columns:1fr;gap:5px}
+ .signal-arrow{font-size:15px;line-height:15px;transform:rotate(90deg)}
+ .signal-stage{padding:10px}
+}
