@@ -7,15 +7,16 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs
+import re
 
 BASE = Path(__file__).resolve().parents[2]
 REQUIRED_FILES = {
     'source_license': 'LICENSE',
     'competition_readme': 'README.md',
     'architecture_pdf': 'submission/architecture.pdf',
-    'presentation_pdf': 'submission/presentation.pdf',
-    'presentation_editable': 'submission/presentation.pptx',
+    'presentation_pdf': 'submission/HimanshuDigitalTwin_Presentation.pdf',
+    'presentation_editable': 'submission/HimanshuDigitalTwin_Presentation.pptx',
     'demo_runbook': 'submission/DEMO_RUNBOOK.md',
     'video_script': 'submission/VIDEO_RECORDING_PLAN.md',
 }
@@ -28,6 +29,24 @@ def _remote_url(url: str, allowed_host: str) -> bool:
         return p.scheme == 'https' and (p.hostname == allowed_host or
             (allowed_host == 'youtube.com' and p.hostname in ('www.youtube.com', 'youtu.be', 'youtube.com')) or
             (allowed_host == 'github.com' and p.hostname == 'www.github.com')) and bool(p.path.strip('/'))
+    except (TypeError, ValueError):
+        return False
+
+
+def _youtube_video_url(url: str) -> bool:
+    """Validate plausible YouTube watch/share URL; never assert link is playable."""
+    try:
+        p = urlparse(url)
+        if p.scheme != 'https':
+            return False
+        host = (p.hostname or '').lower()
+        if host in ('youtube.com', 'www.youtube.com', 'm.youtube.com'):
+            video_id = parse_qs(p.query).get('v', [''])[0] if p.path == '/watch' else ''
+        elif host == 'youtu.be':
+            video_id = p.path.strip('/')
+        else:
+            return False
+        return bool(re.fullmatch(r'[A-Za-z0-9_-]{11}', video_id))
     except (TypeError, ValueError):
         return False
 
@@ -51,8 +70,12 @@ def evaluate(root: Path, metadata: dict) -> dict:
     add('github_url_format',_remote_url(url,'github.com'),'Public GitHub repository URL formatted correctly',evidence='syntax-only')
     add('github_public_checked',metadata.get('public_repository_confirmed') is True,'Repo and all paths manually confirmed accessible to reviewers',evidence='manual-attestation')
     vid=metadata.get('demo_video_url','')
-    add('video_url_format',_remote_url(vid,'youtube.com') or _remote_url(vid,'drive.google.com'),
+    add('video_url_format',_youtube_video_url(vid),
         'Demonstration video URL syntax valid',evidence='syntax-only')
+    readme_path = root / 'README.md'
+    readme = readme_path.read_text(encoding='utf-8') if readme_path.is_file() else ''
+    add('video_url_in_readme', bool(vid and _youtube_video_url(vid) and vid in readme),
+        'Same valid video URL is present in root README', evidence='local-file')
     duration=metadata.get('demo_video_duration_minutes')
     add('video_length',isinstance(duration,(int,float)) and not isinstance(duration,bool) and duration>=20,
         'At least 20-minute video, per official current listing; verify participant dashboard wording',evidence='user-confirmed')
