@@ -12,5 +12,5 @@
   "demo_video_duration_minutes": 0,
   "video_link_access_confirmed": false,
   "submission_platform_entry_confirmed": false,
-  "notes": "The repository is public and has committed runnable application source, documentation, and browser-based presentation. Printable PDF and PowerPoint are produced by the presentation build workflow. Registration, 20-minute video, and Unstop receipt remain unconfirmed."
+  "notes": "The public repository contains runnable FastAPI source, a concise judge guide, verified synthetic-browser screenshots, a native editable six-slide PowerPoint and PDF, an architecture PDF, and research evidence with limitations. Registered roster, a real minimum-20-minute unlisted video link, and actual Unstop acknowledgement remain unconfirmed."
 }
