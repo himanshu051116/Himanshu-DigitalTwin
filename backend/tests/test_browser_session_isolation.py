@@ -90,3 +90,25 @@ def test_parallel_same_cookie_lookups_return_identical_isolated_state():
     with ThreadPoolExecutor(max_workers=8) as pool:
         sessions = list(pool.map(store.obtain, [token] * 16))
     assert all(t == token and st is expected for t, st in sessions)
+
+
+def test_public_health_and_cors_preflight_do_not_allocate_a_demo_session():
+    browser = TestClient(app)
+    health = browser.get("/api/health")
+    assert health.status_code == 200
+    assert browser.cookies.get(COOKIE_NAME) is None
+
+    preflight = browser.options(
+        "/api/scenario",
+        headers={
+            "Origin": "http://localhost:3000",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "content-type",
+        },
+    )
+    assert preflight.status_code == 200
+    assert browser.cookies.get(COOKIE_NAME) is None
+
+    first_stateful = browser.get("/api/patients")
+    assert first_stateful.status_code == 200
+    assert browser.cookies.get(COOKIE_NAME)
