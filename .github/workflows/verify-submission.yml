@@ -6,6 +6,8 @@ on:
   push:
     paths:
       - "README.md"
+      - "run_local.bat"
+      - "run_local.sh"
       - "SUBMISSION_CHECKLIST.md"
       - "JUDGE_START_HERE.md"
       - "backend/**"
@@ -30,6 +32,34 @@ jobs:
         run: python -m pip install --disable-pip-version-check -r backend/requirements.txt
       - name: Validate default browser JavaScript syntax
         run: node --check backend/static/app.js
+      - name: Smoke-test documented local launcher
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash run_local.sh > /tmp/hdt-judge-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          python - <<'PY'
+          import json
+          import time
+          from urllib.request import urlopen
+          from urllib.error import URLError
+          base = "http://127.0.0.1:8000"
+          for attempt in range(60):
+              try:
+                  with urlopen(base + "/api/health", timeout=2) as res:
+                      health = json.load(res)
+                  assert health["status"] == "ok"
+                  with urlopen(base + "/", timeout=2) as res:
+                      page = res.read().decode("utf-8")
+                  assert "HimanshuDigitalTwin" in page
+                  print("Documented local launcher: health and homepage verified.")
+                  break
+              except (URLError, TimeoutError, ConnectionError):
+                  time.sleep(0.25)
+          else:
+              raise AssertionError("FastAPI judge launcher never became healthy")
+          PY
       - name: Run unit and regression tests
         run: python -m pytest backend/tests -q
       - name: Verify synthetic judge replay
